@@ -1,0 +1,152 @@
+package pe.gob.onp.orrhh.qr.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import pe.gob.onp.orrhh.qr.dto.ProfesorCriteriaSearchDTO;
+import pe.gob.onp.orrhh.qr.dto.ProfesorDTO;
+import pe.gob.onp.orrhh.qr.model.Profesor;
+import pe.gob.onp.orrhh.qr.repository.ProfesorRepository;
+import pe.gob.onp.orrhh.qr.utilitario.Constantes;
+import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
+import pe.gob.onp.orrhh.qr.utilitario.exception.ProfesorException;
+
+@Service
+public class ProfesorService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ProfesorService.class);
+	
+	@Autowired
+	private ProfesorRepository repository;
+	
+	@Autowired
+	private MessageSource messageSource; 
+	
+	public ProfesorDTO guardarProfesor(ProfesorDTO profesorDTO) throws ProfesorException {
+		try {
+			if(validaCamposProfesor(profesorDTO)) {
+				if(profesorDTO.getIdProfesor() != null) {
+					Optional<Profesor> tmp = repository.findById(profesorDTO.getIdProfesor());
+					if(tmp == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_NOT_FOUND, null, Locale.US));
+					profesorDTO.setUsuarioCreacion(tmp.get().getUsuarioCreacion());
+					profesorDTO.setFechaCreacion(tmp.get().getFechaCreacion());
+					profesorDTO.setFechaModifica(DateUtilitario.getCurrentDate());
+				} else {
+					profesorDTO.setFechaCreacion(DateUtilitario.getCurrentDate());
+				}
+				Profesor profesor = new Profesor();
+				BeanUtils.copyProperties(profesor, profesorDTO);
+				profesor = repository.save(profesor);
+				profesorDTO.setIdProfesor(profesor.getIdProfesor());
+			}
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new ProfesorException(e.getLocalizedMessage());
+		}
+		return profesorDTO;
+	}
+	
+	public boolean validaCamposProfesor(ProfesorDTO profesorDTO) throws ProfesorException {
+		if(profesorDTO.getDni() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_DNI, null, Locale.US));
+		if(profesorDTO.getTipoDocumento() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_TIPO_DOCUMENTO, null, Locale.US));
+		if(profesorDTO.getNombre() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_NOMBRE, null, Locale.US));
+		if(profesorDTO.getApellidoPaterno() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_PATERNO, null, Locale.US));
+		if(profesorDTO.getApellidoMaterno() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_MATERNO, null, Locale.US));
+		if(profesorDTO.getActivo() == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_ACTIVO, null, Locale.US));
+		return true;
+	}
+	
+	public List<ProfesorDTO> listarProfesorAll() throws ProfesorException {
+		List<ProfesorDTO> list = new ArrayList<ProfesorDTO>();
+		try {
+			Iterable<Profesor> iterator = repository.findAll();
+			iterator.forEach( item -> {
+				try {
+					ProfesorDTO profesorDTO = new ProfesorDTO();
+					BeanUtils.copyProperties(profesorDTO, item);
+					list.add(profesorDTO);
+				} catch (Exception e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+			});
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new ProfesorException(e.getLocalizedMessage());
+		}
+		return list;
+	}
+	
+	public ProfesorDTO obtenerProfesorById(Long id) throws ProfesorException {
+		ProfesorDTO profesorDTO = new ProfesorDTO();
+		try {
+			if(id == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_ID, null, Locale.US));
+			Optional<Profesor> optional = repository.findById(id);
+			if(optional==null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_NOT_FOUND, null, Locale.US));
+			Profesor profesor = optional.get();
+			BeanUtils.copyProperties(profesorDTO, profesor);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new ProfesorException(e.getLocalizedMessage());
+		}
+		return profesorDTO;
+	}
+	
+	public List<ProfesorDTO> findByCriteriaProfesorDTO(ProfesorCriteriaSearchDTO requestSearch) throws ProfesorException {
+		List<Profesor> list = findByCriteria(requestSearch);
+		List<ProfesorDTO> profesores = new ArrayList<ProfesorDTO>();
+		list.forEach(item -> {
+			ProfesorDTO profesorDTO = new ProfesorDTO();
+			try {
+				BeanUtils.copyProperties(profesorDTO, item);
+				profesores.add(profesorDTO);
+			} catch (Exception e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
+		});
+		return profesores;
+	}
+	
+	public List<Profesor> findByCriteria(ProfesorCriteriaSearchDTO requestSearch) throws ProfesorException {
+		return repository.findAll(new Specification<Profesor>() {
+			@Override
+			public Predicate toPredicate(Root<Profesor> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(requestSearch.getDni() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), requestSearch.getDni())));
+				}
+				
+				if(requestSearch.getNombre() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("nombre"), requestSearch.getNombre())));
+				}
+				
+				if(requestSearch.getApellidoPaterno() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("apellidoPaterno"), requestSearch.getApellidoPaterno())));
+				}
+				
+				if(requestSearch.getApellidoMaterno() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("apellidoMaterno"), requestSearch.getApellidoMaterno())));
+				}
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
+	
+	
+	
+}
