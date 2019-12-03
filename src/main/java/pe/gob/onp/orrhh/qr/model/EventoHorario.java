@@ -2,6 +2,7 @@ package pe.gob.onp.orrhh.qr.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,8 +30,8 @@ public class EventoHorario {
 	@Column( name = "HORA_FIN" )
 	private String horaFin;
 	
-	@ManyToOne
-	@JoinColumn( name = "ID_EVENTO" , nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn( name = "ID_EVENTO", nullable = false)
 	private Evento evento;
 	
 	

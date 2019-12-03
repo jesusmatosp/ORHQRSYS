@@ -12,7 +12,7 @@ public class EventoHorarioDTO implements Serializable {
 	private String dia;
 	private String horaInicio;
 	private String horaFin;
-	private EventoDTO evento;
+//	private EventoDTO evento;
 	public Long getIdEventoHorario() {
 		return idEventoHorario;
 	}
@@ -37,12 +37,12 @@ public class EventoHorarioDTO implements Serializable {
 	public void setHoraFin(String horaFin) {
 		this.horaFin = horaFin;
 	}
-	public EventoDTO getEvento() {
-		return evento;
-	}
-	public void setEvento(EventoDTO evento) {
-		this.evento = evento;
-	}
+//	public EventoDTO getEvento() {
+//		return evento;
+//	}
+//	public void setEvento(EventoDTO evento) {
+//		this.evento = evento;
+//	}
 	
 	
 }

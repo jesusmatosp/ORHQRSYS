@@ -6,9 +6,6 @@ import java.util.List;
 
 public class EventoDTO implements Serializable {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Long idEvento;
 	private String nombreEvento;
@@ -23,7 +20,8 @@ public class EventoDTO implements Serializable {
 	private Date fechaCreacion;
 	private String usuarioModifica;
 	private Date fechaModifica;
-	private List<EventoHorarioDTO> horario;
+	private List<EventoHorarioDTO> horarioDTO;
+	private ProfesorDTO profesorDTO;
 	
 	public Long getIdEvento() {
 		return idEvento;
@@ -103,11 +101,18 @@ public class EventoDTO implements Serializable {
 	public void setFechaModifica(Date fechaModifica) {
 		this.fechaModifica = fechaModifica;
 	}
-	public List<EventoHorarioDTO> getHorario() {
-		return horario;
+	public ProfesorDTO getProfesorDTO() {
+		return profesorDTO;
 	}
-	public void setHorario(List<EventoHorarioDTO> horario) {
-		this.horario = horario;
+	public void setProfesorDTO(ProfesorDTO profesorDTO) {
+		this.profesorDTO = profesorDTO;
 	}
+	public List<EventoHorarioDTO> getHorarioDTO() {
+		return horarioDTO;
+	}
+	public void setHorarioDTO(List<EventoHorarioDTO> horarioDTO) {
+		this.horarioDTO = horarioDTO;
+	}
+
 
 }

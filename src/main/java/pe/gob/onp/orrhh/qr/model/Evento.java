@@ -61,10 +61,10 @@ public class Evento {
 	@Column( name = "FECHA_MODIFICA" )
 	private Date fechaModifica;
 	
-	@OneToMany( mappedBy = "evento")
+	@OneToMany( mappedBy = "evento", cascade = CascadeType.ALL)
 	private List<EventoHorario> horario;
 	
-	@OneToOne( cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn( name = "idProfesor", referencedColumnName = "ID_PROFESOR")
 	private Profesor profesor;
 	
