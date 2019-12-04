@@ -2,11 +2,15 @@ package pe.gob.onp.orrhh.qr.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -64,6 +68,10 @@ public class Persona {
 	
 	@Column( name = "USUARIO_CARGA" )
 	private String usuarioCarga;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn( name = "ID_PROCESO" , nullable = false)
+	private Proceso proceso;
 	
 	public Integer getIdPersona() {
 		return idPersona;
@@ -161,5 +169,10 @@ public class Persona {
 	public void setUsuarioCarga(String usuarioCarga) {
 		this.usuarioCarga = usuarioCarga;
 	}
-	
+	public Proceso getProceso() {
+		return proceso;
+	}
+	public void setProceso(Proceso proceso) {
+		this.proceso = proceso;
+	}
 }

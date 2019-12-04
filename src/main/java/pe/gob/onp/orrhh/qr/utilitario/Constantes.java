@@ -24,5 +24,11 @@ public class Constantes {
 	public static final String MESSAGE_EXCEPTION_EVENTO_NOT_FOUND = "pe.gob.onp.qr.exception.evento.notFound";
 	public static final String MESSAGE_EXCEPTION_EVENTO_PROFESOR_NO_ASIGNADO = "pe.gob.onp.qr.exception.evento.profesor.noasignado";
 	public static final String MESSAGE_EXCEPTION_EVENTO_HORARIO_NO_ASIGNADO = "pe.gob.onp.qr.exception.evento.horario.noasignado";
-	
+
+	public static final String MESSAGE_EXCEPTION_PERSONA_ID ="pe.gob.onp.qr.exception.persona.id";
+	public static final String MESSAGE_EXCEPTION_PERSONA_NOMBRE ="pe.gob.onp.qr.exception.persona.nombre";
+	public static final String MESSAGE_EXCEPTION_PERSONA_APELLIDO_PATERNO ="pe.gob.onp.qr.exception.persona.apellido.paterno";
+	public static final String MESSAGE_EXCEPTION_PERSONA_APELLIDO_MATERNO ="pe.gob.onp.qr.exception.persona.apellido.materno";
+	public static final String MESSAGE_EXCEPTION_PERSONA_DNI ="pe.gob.onp.qr.exception.persona.dni";
+	public static final String MESSAGE_EXCEPTION_PERSONA_CORREO_CORPORATIVO ="pe.gob.onp.qr.exception.persona.correo.corporativo";
 }
