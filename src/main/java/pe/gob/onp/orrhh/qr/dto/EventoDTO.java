@@ -1,6 +1,7 @@
 package pe.gob.onp.orrhh.qr.dto;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 

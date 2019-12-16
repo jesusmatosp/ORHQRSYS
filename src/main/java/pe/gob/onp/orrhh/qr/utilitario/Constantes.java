@@ -1,3 +1,4 @@
+
 package pe.gob.onp.orrhh.qr.utilitario;
 
 public class Constantes {
@@ -31,4 +32,14 @@ public class Constantes {
 	public static final String MESSAGE_EXCEPTION_PERSONA_APELLIDO_MATERNO ="pe.gob.onp.qr.exception.persona.apellido.materno";
 	public static final String MESSAGE_EXCEPTION_PERSONA_DNI ="pe.gob.onp.qr.exception.persona.dni";
 	public static final String MESSAGE_EXCEPTION_PERSONA_CORREO_CORPORATIVO ="pe.gob.onp.qr.exception.persona.correo.corporativo";
+	
+	public static final String MESSAGE_EXCEPTION_PROCESO_ID = "pe.gob.onp.qr.exception.proceso.id";
+	public static final String MESSAGE_EXCEPTION_PROCESO_NOT_FOUND = "pe.gob.onp.qr.exception.proceso.notFound";
+	
+	public static final String ESTADO_ACTIVO_VALUE = "A";
+	public static final String ESTADO_INACTIVO_VALUE = "I";
+	
+	public static final String GMAIL_HOST = "smtp.gmail.com";
+	public static final String GMAIL_USERNAME = "mitsolution.laser@gmail.com";
+	public static final String GMAIL_PASSWORD = "M1ts0lut10n";
 }

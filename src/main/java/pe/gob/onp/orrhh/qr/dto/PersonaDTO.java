@@ -22,7 +22,7 @@ public class PersonaDTO implements Serializable{
 	private Date fechaIngreso;
 	private String correoCorporativo;
 	private String correoPersonal;
-	private String codQR;
+	private byte[] codQR;
 	private Date fechaCarga;
 	private String usuarioCarga;
 	
@@ -104,12 +104,6 @@ public class PersonaDTO implements Serializable{
 	public void setCorreoPersonal(String correoPersonal) {
 		this.correoPersonal = correoPersonal;
 	}
-	public String getCodQR() {
-		return codQR;
-	}
-	public void setCodQR(String codQR) {
-		this.codQR = codQR;
-	}
 	public Date getFechaCarga() {
 		return fechaCarga;
 	}
@@ -121,6 +115,12 @@ public class PersonaDTO implements Serializable{
 	}
 	public void setUsuarioCarga(String usuarioCarga) {
 		this.usuarioCarga = usuarioCarga;
+	}
+	public byte[] getCodQR() {
+		return codQR;
+	}
+	public void setCodQR(byte[] codQR) {
+		this.codQR = codQR;
 	}
 	
 }

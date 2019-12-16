@@ -52,4 +52,24 @@ public class ParametroService {
 		}
 		return list;
 	}
+	
+	public List<ParametroDTO> listarParametrosByCodPadre(String codPadre) throws Exception {
+		List<ParametroDTO> list = new ArrayList<ParametroDTO>();
+		try {
+			List<Parametro> parametros = repository.findParametroByCodPadre(codPadre);
+			parametros.forEach(item -> {
+				ParametroDTO parametroDTO = new ParametroDTO();
+				try {
+					BeanUtils.copyProperties(parametroDTO, item);
+					list.add(parametroDTO);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			throw new Exception(e.getLocalizedMessage());
+		}
+		return list;
+	}
 }

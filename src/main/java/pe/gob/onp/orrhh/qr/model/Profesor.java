@@ -4,9 +4,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -60,8 +63,10 @@ public class Profesor {
 	@Column(name = "FECHA_MODIFICA")
 	private Date fechaModifica;
 	
-	@OneToOne(mappedBy = "profesor" )
-	private Evento evento;
+	// @OneToOne(mappedBy = "profesor" )
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn( name = "ID_PROFESOR", nullable = false)
+//	private Evento evento;
 	
 	public Long getIdProfesor() {
 		return idProfesor;
@@ -76,6 +81,8 @@ public class Profesor {
 		this.dni = dni;
 	}
 	public String getTipoDocumento() {
+		if(tipoDocumento != null)
+			tipoDocumento = tipoDocumento.trim();
 		return tipoDocumento;
 	}
 	public void setTipoDocumento(String tipoDocumento) {
@@ -141,11 +148,11 @@ public class Profesor {
 	public void setFechaModifica(Date fechaModifica) {
 		this.fechaModifica = fechaModifica;
 	}
-	public Evento getEvento() {
-		return evento;
-	}
-	public void setEvento(Evento evento) {
-		this.evento = evento;
-	}
+//	public Evento getEvento() {
+//		return evento;
+//	}
+//	public void setEvento(Evento evento) {
+//		this.evento = evento;
+//	}
 	
 }

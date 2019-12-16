@@ -1,5 +1,6 @@
 package pe.gob.onp.orrhh.qr.model;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table( name = "EVENTO", schema = "ORHQRSYS" )
@@ -52,21 +55,26 @@ public class Evento {
 	@Column( name = "USUARIO_CREA" )
 	private String usuarioCreacion;
 	
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column( name = "FECHA_CREA" )
 	private Date fechaCreacion;
 	
 	@Column( name = "USUARIO_MODIFICA" )
 	private String usuarioModifica;
 	
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column( name = "FECHA_MODIFICA" )
 	private Date fechaModifica;
 	
 	@OneToMany( mappedBy = "evento", cascade = CascadeType.ALL)
 	private List<EventoHorario> horario;
 	
-	@OneToOne
-	@JoinColumn( name = "idProfesor", referencedColumnName = "ID_PROFESOR")
-	private Profesor profesor;
+	//@OneToOne
+	//@JoinColumn( name = "idProfesor", referencedColumnName = "ID_PROFESOR")
+//	@OneToMany( mappedBy = "evento", cascade = CascadeType.ALL)
+//	private List<Profesor> profesores;
+	@Column( name = "ID_PROFESOR" )
+	private Long idProfesor;
 	
 	public Long getIdEvento() {
 		return idEvento;
@@ -152,11 +160,17 @@ public class Evento {
 	public void setHorario(List<EventoHorario> horario) {
 		this.horario = horario;
 	}
-	public Profesor getProfesor() {
-		return profesor;
+//	public Profesor getProfesor() {
+//		return profesor;
+//	}
+//	public void setProfesor(Profesor profesor) {
+//		this.profesor = profesor;
+//	}
+	public Long getIdProfesor() {
+		return idProfesor;
 	}
-	public void setProfesor(Profesor profesor) {
-		this.profesor = profesor;
+	public void setIdProfesor(Long idProfesor) {
+		this.idProfesor = idProfesor;
 	}
 
 }

@@ -1,30 +1,75 @@
 package pe.gob.onp.orrhh.qr.service;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import pe.gob.onp.orrhh.qr.bean.AsistenteSedeBen;
+import pe.gob.onp.orrhh.qr.bean.PersonaEventoAsistenteBean;
+import pe.gob.onp.orrhh.qr.dto.AsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoHorarioDTO;
+import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
+import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
+import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ProfesorDTO;
 import pe.gob.onp.orrhh.qr.model.Evento;
 import pe.gob.onp.orrhh.qr.model.EventoHorario;
+import pe.gob.onp.orrhh.qr.model.PersonAsistencia;
+import pe.gob.onp.orrhh.qr.model.Persona;
+import pe.gob.onp.orrhh.qr.model.PersonaEvento;
+import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
+import pe.gob.onp.orrhh.qr.model.Proceso;
 import pe.gob.onp.orrhh.qr.model.Profesor;
+import pe.gob.onp.orrhh.qr.repository.AsistenteSedeRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaEventoAsistenciaRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaEventoRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaRepository;
+import pe.gob.onp.orrhh.qr.repository.ProcesoRepository;
 import pe.gob.onp.orrhh.qr.repository.ProfesorRepository;
 import pe.gob.onp.orrhh.qr.utilitario.Constantes;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
+import pe.gob.onp.orrhh.qr.utilitario.JasperDataSource;
+import pe.gob.onp.orrhh.qr.utilitario.MailTemplateUtil;
+import pe.gob.onp.orrhh.qr.utilitario.QRCodeGenerator;
 import pe.gob.onp.orrhh.qr.utilitario.exception.EventoException;
 
 @Service
 public class EventoService {
 
+	@Autowired
+	private PersonaEventoRepository personaEvtRepository;
+	
 	@Autowired
 	private EventoRepository repository;
 	
@@ -32,7 +77,28 @@ public class EventoService {
 	private ProfesorRepository profesorRepository;
 	
 	@Autowired
+	private ProcesoRepository procesoRepository;
+	
+	@Autowired
+	private PersonaRepository personaRepository;
+	
+	@Autowired
 	private MessageSource messageSource; 
+	
+	@Autowired
+	private MailService mailService;
+	
+	@Autowired
+	private ResourceLoader resourceLoader;
+	
+	@Autowired
+	private PersonaAsistenciaRepository asistenciaRepository;
+	
+	@Autowired
+	private AsistenteSedeRepository asistenciaSedeRepository;
+	
+	@Autowired
+	private PersonaEventoAsistenciaRepository personaEventoAsistenciaRepository;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EventoService.class); 
 	
@@ -64,7 +130,7 @@ public class EventoService {
 					eventoHorario.setEvento(evento);
 					horarios.add(eventoHorario);
 				}
-				evento.setProfesor(profesor);
+				evento.setIdProfesor(profesor.getIdProfesor());
 				evento.setHorario(horarios);
 				evento = repository.save(evento);
 				eventoDTO = obtenerEventoById(evento.getIdEvento());
@@ -84,7 +150,8 @@ public class EventoService {
 				try {
 					EventoDTO eventoDTO = new EventoDTO();
 					// Profesor:
-					Profesor profesor = item.getProfesor();
+					Optional<Profesor> oProfesor = profesorRepository.findById(item.getIdProfesor());
+					Profesor profesor = oProfesor.get();
 					ProfesorDTO profesorDTO = new ProfesorDTO();
 					BeanUtils.copyProperties(profesorDTO, profesor);
 					// Horarios:
@@ -116,9 +183,13 @@ public class EventoService {
 			Optional<Evento> optional = repository.findById(id);
 			if(optional == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_NOT_FOUND, null, Locale.US));
 			Evento evento = optional.get();
-			Profesor profesor = evento.getProfesor();
+			
+			Optional<Profesor> oProfesor = profesorRepository.findById(evento.getIdProfesor());
 			ProfesorDTO profesorDTO = new ProfesorDTO();
-			BeanUtils.copyProperties(profesorDTO, profesor);
+			if(oProfesor != null) {
+				Profesor profesor = oProfesor.get();
+				BeanUtils.copyProperties(profesorDTO, profesor);
+			};
 			
 			List<EventoHorario> horario = evento.getHorario();
 			List<EventoHorarioDTO> horarioDTO = new ArrayList<EventoHorarioDTO>();
@@ -150,11 +221,16 @@ public class EventoService {
 			for(Evento e: eventos) {
 				EventoDTO eventoDTO = new EventoDTO();
 				BeanUtils.copyProperties(eventoDTO, e);
-				Profesor profesor = e.getProfesor();
-				List<EventoHorario> horario = e.getHorario();
-				List<EventoHorarioDTO> lstHorario = new ArrayList<EventoHorarioDTO>();
+				
+				
+				Optional<Profesor> oProfesor = profesorRepository.findById(e.getIdProfesor());
+				Profesor profesor = oProfesor.get();
 				ProfesorDTO profesorDTO = new ProfesorDTO();
 				BeanUtils.copyProperties(profesorDTO, profesor);
+				
+				List<EventoHorario> horario = e.getHorario();
+				List<EventoHorarioDTO> lstHorario = new ArrayList<EventoHorarioDTO>();
+				
 				for(EventoHorario h: horario) {
 					EventoHorarioDTO eventoHorarioDTO = new EventoHorarioDTO();
 					BeanUtils.copyProperties(eventoHorarioDTO, h);
@@ -169,6 +245,70 @@ public class EventoService {
 			throw new EventoException(e.getLocalizedMessage());
 		}
 		return list;
+	}
+	
+	@Transactional
+	public void asociarEvento(Long idEvento, Long idProceso) throws EventoException, Exception {
+		Optional<Evento> optEvento = repository.findById(idEvento);
+		if(optEvento == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_NOT_FOUND, null, Locale.US));
+		Evento evt = optEvento.get();
+		
+		Optional<Proceso> optProceso = procesoRepository.findById(idProceso);
+		if(optProceso == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROCESO_NOT_FOUND, null, Locale.US));
+		Proceso prc = optProceso.get();
+				
+		List<Persona> lstPersonas = prc.getPersonas();
+		for(Persona persona: lstPersonas) {
+			PersonaEventoDTO evtPer = new PersonaEventoDTO();
+			evtPer.setIdPersona(Long.parseLong(String.valueOf(persona.getIdPersona())));
+			evtPer.setIdEvento(evt.getIdEvento());
+			guardarPersonaEvento(evtPer);
+			
+			QRCodeGenerator qrGenerator = new QRCodeGenerator();
+			byte[] qrCode = qrGenerator.getQRCodeImage(persona.getIdPersona() + "-" + evt.getIdEvento(), 250, 250);
+			persona.setCodQR(qrCode);
+			personaRepository.save(persona);
+
+			// Notificar:
+			String emailBody = MailTemplateUtil.templateQRCode(persona, evt);
+			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
+					false, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
+					"png");
+		}
+	}
+	
+	public void guardarPersonaEvento(PersonaEventoDTO personaEventoDTO) throws EventoException {
+		PersonaEvento personaEvento = new PersonaEvento();
+		PersonaEventoPK id = new PersonaEventoPK();
+		id.setIdEvento(personaEventoDTO.getIdEvento());
+		id.setIdPersona(personaEventoDTO.getIdPersona());
+		personaEvento.setId(id);
+		personaEvento.setActivo(Constantes.ESTADO_ACTIVO_VALUE);
+		personaEvtRepository.save(personaEvento);
+	}
+	
+	public List<PersonaDTO> listarPersonasMatriculadas(Long idEvento) throws EventoException {
+		Optional<Evento> optEvento = repository.findById(idEvento);
+		if(optEvento == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_NOT_FOUND, null, Locale.US));
+		
+		List<PersonaDTO> lstPersonasDTO = new ArrayList<PersonaDTO>();
+		List<PersonaEvento> listaPersonas = personaEvtRepository.getPersonaEventoByIdEvento(idEvento);
+		List<Integer> ids = new ArrayList<Integer>();
+		listaPersonas.forEach( item -> {
+			ids.add(Integer.parseInt(String.valueOf(item.getId().getIdPersona())));
+		});
+		List<Persona> personas = personaRepository.getPersonasByIdPersonas(ids);
+		for(Persona p: personas) {
+			PersonaDTO personaDTO = new PersonaDTO();
+			try {
+				BeanUtils.copyProperties(personaDTO, p);
+				lstPersonasDTO.add(personaDTO);
+			} catch (Exception e) {
+				LOG.error(e.getLocalizedMessage(), e);
+				e.printStackTrace();
+			} 
+		}
+		return lstPersonasDTO;
 	}
 	
 	public boolean validaEvento(EventoDTO eventoDTO) throws EventoException {
@@ -186,5 +326,138 @@ public class EventoService {
 		return true;
 	}
 	
+	// Vistas Soporte:
+	public List<AsistenteSedeBen> getListaAsistentexSede(FilterReporteDTO filter) throws EventoException {
+		return asistenciaSedeRepository.findAll(new Specification<AsistenteSedeBen>() {
+			@Override
+			public Predicate toPredicate(Root<AsistenteSedeBen> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(filter.getTipoEvento() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("tipoEvento"), filter.getTipoEvento() )));
+				}
+				if(filter.getSede() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), filter.getSede() )));
+				}
+				if(filter.getFechaInicio() != null && filter.getFechaFin() != null){
+					try {
+						Date dtBegin = DateUtilitario.convertStringToDate(filter.getFechaInicio());
+						Date dtEnd = DateUtilitario.convertStringToDate(filter.getFechaFin());
+						Path<Date> dateEntryPath = root.get("fechaInicio");
+						predicates.add(criteriaBuilder.and(criteriaBuilder.between(dateEntryPath, dtBegin, dtEnd)));
+					} catch (Exception e) {
+						LOG.error(e.getLocalizedMessage());
+					}
+				}
+				query.orderBy(criteriaBuilder.desc(root.get("idEvento")));
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
+	public List<PersonaEventoAsistenteBean> getListaPersonaEventoAsistencia(FilterReporteDTO filter) throws EventoException {
+		return personaEventoAsistenciaRepository.findAll(new Specification<PersonaEventoAsistenteBean>() {
+			
+			@Override
+			public Predicate toPredicate(Root<PersonaEventoAsistenteBean> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(filter.getTipoEvento() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("tipoEvento"), filter.getTipoEvento() )));
+				}
+				if(filter.getIdCurso() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), filter.getIdCurso() )));
+				}
+				if(filter.getSede() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), filter.getSede() )));
+				}
+				if(filter.getFecha() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("fechaIngreso"), filter.getFecha() )));
+				}
+				if(filter.getDni() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), filter.getDni() )));
+				}
+				
+				query.orderBy(criteriaBuilder.desc(root.get("idAsistencia")));
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
+	// Reportes:
+	public JasperPrint generarReporteAsistencia(Long idEvento) throws JRException, IOException {
+		 String path = resourceLoader.getResource("classpath:rpte_asistencia_curso.jrxml").getURI().getPath();
+		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		 // Parameters for report
+		 List<PersonAsistencia> list = asistenciaRepository.getAsistenciaByIdEvento(idEvento);
+		 Optional<Evento> opt = repository.findById(idEvento);
+		 Evento evento = opt.get();
+		 
+		 Map<String, Object> parameters = new HashMap<String, Object>();
+		 
+		 Optional<Profesor> oProfesor = profesorRepository.findById(evento.getIdProfesor());
+		 Profesor profesor = oProfesor.get();
+		 
+		 parameters.put("P_PROFESOR", profesor.getNombre() + " " + profesor.getApellidoPaterno() + " " + profesor.getApellidoMaterno());
+		 parameters.put("P_CURSO", evento.getNombreEvento());
+
+		 List<Object> data = new ArrayList<>();
+		 int i = 1;
+		 
+		 for(PersonAsistencia pe: list) {
+			 AsistenciaDTO bean = new AsistenciaDTO();
+			 bean.setNumero(new Integer(i));
+			 Optional<Persona> optionPersona = personaRepository.findById(Integer.parseInt(String.valueOf(pe.getIdPersona())));
+			 Persona personal = optionPersona.get();
+			 bean.setNombres(personal.getNombres());
+			 bean.setPaterno(personal.getApellidoPaterno());
+			 bean.setMaterno(personal.getApellidoMaterno());
+			 bean.setFecha(personal.getFechaCarga()); 
+			 i++;
+			 data.add(bean);
+		 }
+		 // Conexion
+		 JasperDataSource dataSource = null;
+		 dataSource = new JasperDataSource(AsistenciaDTO.class);
+		 dataSource.addListData(data);
+		 // JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+		 JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+		 return print;
+	}
+	
+	public JasperPrint generarReporteAsistenciaFecha(FilterReporteDTO filter) throws JRException, IOException, EventoException {
+		String path = resourceLoader.getResource("classpath:reporteAsistenciaPersona.jrxml").getURI().getPath();
+		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		 // Parameters for report
+		 Map<String, Object> parameters = new HashMap<String, Object>();
+		 List<PersonaEventoAsistenteBean> lista = getListaPersonaEventoAsistencia(filter);
+		 List<Object> data = new ArrayList<>();
+		 for(PersonaEventoAsistenteBean bean: lista) {
+			 data.add(bean);
+		 }
+		// Conexion
+		JasperDataSource dataSource = null;
+		dataSource = new JasperDataSource(AsistenciaDTO.class);
+		dataSource.addListData(data);
+		JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+		return print;
+	}
+	
+	public JasperPrint generarReporteAsistenciaSede(FilterReporteDTO filter) throws JRException, IOException, EventoException {
+		String path = resourceLoader.getResource("classpath:reporteAsistenciaSede.jrxml").getURI().getPath();
+		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		 // Parameters for report
+		 Map<String, Object> parameters = new HashMap<String, Object>();
+		 List<AsistenteSedeBen> lista = getListaAsistentexSede(filter);
+		 List<Object> data = new ArrayList<>();
+		 for(AsistenteSedeBen bean: lista) {
+			 data.add(bean);
+		 }
+		// Conexion
+		JasperDataSource dataSource = null;
+		dataSource = new JasperDataSource(AsistenciaDTO.class);
+		dataSource.addListData(data);
+		JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+		return print;
+	}
 	
 }

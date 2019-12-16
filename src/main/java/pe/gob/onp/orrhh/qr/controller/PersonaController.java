@@ -17,22 +17,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
 import pe.gob.onp.orrhh.qr.model.Persona;
 import pe.gob.onp.orrhh.qr.model.Proceso;
+import pe.gob.onp.orrhh.qr.service.MailService;
 import pe.gob.onp.orrhh.qr.service.PersonaService;
 import pe.gob.onp.orrhh.qr.service.ProcesoService;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
 import pe.gob.onp.orrhh.qr.utilitario.JavaPOI;
+import pe.gob.onp.orrhh.qr.utilitario.MailTemplateUtil;
 import pe.gob.onp.orrhh.qr.utilitario.ONPUtilitarios;
 import pe.gob.onp.orrhh.qr.utilitario.exception.PersonaException;
 
@@ -48,9 +53,11 @@ public class PersonaController {
 	@Autowired
 	private ProcesoService procesoService;
 	
+	
 	@Value("${file.path.orhqr}")
 	private String filePath;
 
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/upload")
 	public @ResponseBody ResponseDataDTO leerCargaArchivo(HttpServletRequest request,
 			@RequestParam("file") MultipartFile uploadfile, @RequestParam("usuarioEjecucion") String usuarioEjecucion) {
@@ -72,11 +79,11 @@ public class PersonaController {
 				list.add(oPersona);
 			}
 			proceso.setPersonas(list);
-			procesoService.procesarCarga(proceso);
+			proceso = procesoService.procesarCarga(proceso);
 			response.setCodigo("100");
 			response.setCodigoHTTP(HttpStatus.OK.name());
-			response.setMessage("OK");
-			response.setData("Los datos se procesaron correctamente!");
+			response.setMessage("" + proceso.getIdProceso());
+			response.setData(personas);
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());
 			response.setCodigo("005");
@@ -103,5 +110,24 @@ public class PersonaController {
 			personas = javaPoiUtils.leerExcelFilePersona(fileProcess);
 		}
 		return personas;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/asistencia")
+	public @ResponseBody ResponseDataDTO registrarAsistencia(@RequestBody PersonaAsistenciaDTO personaAsistenciaDTO){
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			service.marcarAsistencia(personaAsistenciaDTO);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(true);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
 	}
 }

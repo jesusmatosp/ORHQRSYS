@@ -33,7 +33,7 @@ public class Proceso {
 	@Column( name = "USUARIO_EJECUCION" )
 	private String usuarioEjecucion;
 	
-	@OneToMany( mappedBy = "proceso", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany( mappedBy = "proceso", cascade = CascadeType.ALL)
 	private List<Persona> personas;
 
 	public Long getIdProceso() {

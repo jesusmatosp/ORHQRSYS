@@ -13,7 +13,7 @@ import pe.gob.onp.orrhh.qr.model.Evento;
 @Repository
 public interface EventoRepository extends CrudRepository<Evento, Long> {
 
-	@Query("SELECT e FROM Evento e WHERE e.profesor.idProfesor = :id ")
+	@Query("SELECT e FROM Evento e WHERE e.idProfesor = :id ")
 	public List<Evento> findEventoByIdProfesor(Long id);
 	
 }

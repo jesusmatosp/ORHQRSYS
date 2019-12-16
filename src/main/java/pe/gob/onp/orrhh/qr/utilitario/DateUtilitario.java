@@ -16,6 +16,7 @@ public class DateUtilitario {
 		return date1;
 	}
 	
+	
 	public static Date getCurrentDate() {
 		return new Date();
 	}

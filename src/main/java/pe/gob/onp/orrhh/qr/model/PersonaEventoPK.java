@@ -11,21 +11,21 @@ public class PersonaEventoPK implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Column( name = "ID_EVENTO" )
-	private Integer idEvento;
+	private Long idEvento;
 	
 	@Column( name = "ID_PERSONA" )
-	private Integer idPersona;
+	private Long idPersona;
 	
-	public Integer getIdEvento() {
+	public Long getIdEvento() {
 		return idEvento;
 	}
-	public void setIdEvento(Integer idEvento) {
+	public void setIdEvento(Long idEvento) {
 		this.idEvento = idEvento;
 	}
-	public Integer getIdPersona() {
+	public Long getIdPersona() {
 		return idPersona;
 	}
-	public void setIdPersona(Integer idPersona) {
+	public void setIdPersona(Long idPersona) {
 		this.idPersona = idPersona;
 	}
 	

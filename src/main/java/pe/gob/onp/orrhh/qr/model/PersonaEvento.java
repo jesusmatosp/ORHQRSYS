@@ -21,5 +21,11 @@ public class PersonaEvento {
 	public void setActivo(String activo) {
 		this.activo = activo;
 	}
+	public PersonaEventoPK getId() {
+		return id;
+	}
+	public void setId(PersonaEventoPK id) {
+		this.id = id;
+	}
 
 }

@@ -17,7 +17,8 @@ public class ProcesoService {
 	
 	public Proceso procesarCarga(Proceso proceso) throws Exception{
 		try {
-			repository.save(proceso);
+			proceso = repository.save(proceso);
+			
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			throw new Exception(e.getLocalizedMessage());

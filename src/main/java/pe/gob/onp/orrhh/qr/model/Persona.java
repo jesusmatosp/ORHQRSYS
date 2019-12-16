@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -60,8 +61,9 @@ public class Persona {
 	@Column( name = "CORREO_PERSONAL" )
 	private String correoPersonal;
 	
+	@Lob
 	@Column( name = "COD_QR" )
-	private String codQR;
+	private byte[] codQR;
 	
 	@Column( name = "FECHA_CARGA" )
 	private Date fechaCarga;
@@ -151,12 +153,6 @@ public class Persona {
 	public void setCorreoPersonal(String correoPersonal) {
 		this.correoPersonal = correoPersonal;
 	}
-	public String getCodQR() {
-		return codQR;
-	}
-	public void setCodQR(String codQR) {
-		this.codQR = codQR;
-	}
 	public Date getFechaCarga() {
 		return fechaCarga;
 	}
@@ -174,5 +170,11 @@ public class Persona {
 	}
 	public void setProceso(Proceso proceso) {
 		this.proceso = proceso;
+	}
+	public byte[] getCodQR() {
+		return codQR;
+	}
+	public void setCodQR(byte[] codQR) {
+		this.codQR = codQR;
 	}
 }
