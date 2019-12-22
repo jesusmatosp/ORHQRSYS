@@ -117,7 +117,7 @@ public class PersonaController {
 	public @ResponseBody ResponseDataDTO registrarAsistencia(@RequestBody PersonaAsistenciaDTO personaAsistenciaDTO){
 		ResponseDataDTO response = new ResponseDataDTO();
 		try {
-			service.marcarAsistencia(personaAsistenciaDTO);
+			PersonaAsistenciaDTO resultado = service.marcarAsistencia(personaAsistenciaDTO);
 			response.setCodigo("100");
 			response.setCodigoHTTP(HttpStatus.OK.name());
 			response.setMessage("OK");

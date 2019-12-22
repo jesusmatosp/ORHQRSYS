@@ -142,10 +142,62 @@ public class EventoService {
 		return eventoDTO;
 	}
 	
+	public List<EventoDTO> listarEventoByCriteriaFilter(FilterReporteDTO filter) throws EventoException {
+		List<EventoDTO> listEvento = new ArrayList<EventoDTO>();
+		try {
+			List<Evento> eventos = listarEventoByCriteria(filter);
+			eventos.forEach( evento -> {
+				try {
+					EventoDTO oEvento = new EventoDTO();
+					BeanUtils.copyProperties(oEvento, evento);
+					List<EventoHorario> horarios = evento.getHorario();
+					List<EventoHorarioDTO> horarioList = new ArrayList<EventoHorarioDTO>();
+					horarios.forEach( horario -> {
+						try {
+							EventoHorarioDTO evtHor = new EventoHorarioDTO();
+							BeanUtils.copyProperties(evtHor, horario);
+							horarioList.add(evtHor);
+						} catch (Exception e) {
+							LOG.error(e.getLocalizedMessage(), e);
+						}
+					});
+					oEvento.setHorarioDTO(horarioList);
+					listEvento.add(oEvento);
+				} catch (Exception e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+			});
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new EventoException(e.getLocalizedMessage());
+		}
+		return listEvento;
+	}
+	
+	public List<Evento> listarEventoByCriteria(FilterReporteDTO filter) throws EventoException {
+		return repository.findAll(new Specification<Evento>() {
+			@Override
+			public Predicate toPredicate(Root<Evento> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(filter.getTipoEvento() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("tipoEvento"), "%" + filter.getTipoEvento() + "%")));
+				}
+				if(filter.getIdCurso() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), filter.getIdCurso())));
+				}
+				if( filter.getSede() != null ) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("sede"), filter.getSede())));
+				}
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
 	public List<EventoDTO> listarEventoAll() throws EventoException {
 		List<EventoDTO> list = new ArrayList<EventoDTO>();
 		try {
-			Iterable<Evento> iterator = repository.findAll();
+			// Iterable<Evento> iterator = repository.findAll();
+			List<Evento> iterator = repository.findAllActive();
 			iterator.forEach(item -> {
 				try {
 					EventoDTO eventoDTO = new EventoDTO();
@@ -217,7 +269,7 @@ public class EventoService {
 		if(!optional.isPresent()) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_NOT_FOUND, null, Locale.US));
 		List<EventoDTO> list = new ArrayList<EventoDTO>();
 		try {
-			List<Evento> eventos = repository.findEventoByIdProfesor(idProfesor);
+			List<Evento> eventos = repository.findEventoByIdProfesor(idProfesor, DateUtilitario.getCurrentDate());
 			for(Evento e: eventos) {
 				EventoDTO eventoDTO = new EventoDTO();
 				BeanUtils.copyProperties(eventoDTO, e);
@@ -381,6 +433,18 @@ public class EventoService {
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
 		});
+	}
+	
+	public boolean inactiveEvento(List<Long> ids) throws EventoException {
+		boolean result = false;
+		try {
+			repository.inactiveEvento(ids);
+			result = true;
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new EventoException(e.getLocalizedMessage());
+		}
+		return result;
 	}
 	
 	// Reportes:

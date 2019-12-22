@@ -12,6 +12,8 @@ public class PersonaAsistenciaDTO implements Serializable{
 	private Long idPersona;
 	private Long idEvento;
 	private String estado;
+	private boolean result;
+	private String mensaje;
 	
 	public Long getIdAsistencia() {
 		return idAsistencia;
@@ -42,6 +44,18 @@ public class PersonaAsistenciaDTO implements Serializable{
 	}
 	public void setEstado(String estado) {
 		this.estado = estado;
+	}
+	public boolean isResult() {
+		return result;
+	}
+	public void setResult(boolean result) {
+		this.result = result;
+	}
+	public String getMensaje() {
+		return mensaje;
+	}
+	public void setMensaje(String mensaje) {
+		this.mensaje = mensaje;
 	}
 	
 	

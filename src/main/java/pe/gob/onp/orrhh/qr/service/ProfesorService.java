@@ -74,7 +74,8 @@ public class ProfesorService {
 	public List<ProfesorDTO> listarProfesorAll() throws ProfesorException {
 		List<ProfesorDTO> list = new ArrayList<ProfesorDTO>();
 		try {
-			Iterable<Profesor> iterator = repository.findAll();
+			// Iterable<Profesor> iterator = repository.findAll();
+			List<Profesor> iterator = repository.findAllActive();
 			iterator.forEach( item -> {
 				try {
 					ProfesorDTO profesorDTO = new ProfesorDTO();
@@ -131,22 +132,31 @@ public class ProfesorService {
 				}
 				
 				if(requestSearch.getNombre() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("nombre"), requestSearch.getNombre())));
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("nombre"), "%" + requestSearch.getNombre().toUpperCase() + "%")));
 				}
 				
 				if(requestSearch.getApellidoPaterno() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("apellidoPaterno"), requestSearch.getApellidoPaterno())));
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("apellidoPaterno"), "%" + requestSearch.getApellidoPaterno().toUpperCase() + "%")));
 				}
 				
 				if(requestSearch.getApellidoMaterno() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("apellidoMaterno"), requestSearch.getApellidoMaterno())));
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("apellidoMaterno"), "%" + requestSearch.getApellidoMaterno().toUpperCase() + "%")));
 				}
                 return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
 		});
 	}
 	
-	
-	
+	public boolean eliminarProfesor(List<Long> ids) throws ProfesorException {
+		boolean result = false;
+		try {
+			repository.updateInactiveProfesor(ids);
+			result = true;
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new ProfesorException(e.getLocalizedMessage());
+		}
+		return result;
+	}
 	
 }

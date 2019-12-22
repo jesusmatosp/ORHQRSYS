@@ -1,18 +1,14 @@
 package pe.gob.onp.orrhh.qr.model;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -65,6 +61,9 @@ public class Evento {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column( name = "FECHA_MODIFICA" )
 	private Date fechaModifica;
+	
+	@Column( name = "ACTIVO" )
+	private String activo;
 	
 	@OneToMany( mappedBy = "evento", cascade = CascadeType.ALL)
 	private List<EventoHorario> horario;
@@ -171,6 +170,12 @@ public class Evento {
 	}
 	public void setIdProfesor(Long idProfesor) {
 		this.idProfesor = idProfesor;
+	}
+	public String getActivo() {
+		return activo;
+	}
+	public void setActivo(String activo) {
+		this.activo = activo;
 	}
 
 }

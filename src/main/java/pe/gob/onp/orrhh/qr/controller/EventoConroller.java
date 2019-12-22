@@ -26,6 +26,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
+import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
@@ -120,6 +121,52 @@ public class EventoConroller {
 		}
 		return response;
 	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/delete")
+	public @ResponseBody ResponseDataDTO eliminarEvento(@RequestBody List<Long> idEventos) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			boolean result = service.inactiveEvento(idEventos);
+			if(result) {
+				response.setCodigo("100");
+				response.setCodigoHTTP(HttpStatus.OK.name());
+				response.setMessage("El evento se eliminó correctamente");
+				response.setData(result);
+			} else {
+				response.setCodigo("300");
+				response.setCodigoHTTP(HttpStatus.OK.name());
+				response.setMessage("Ocurrió un error durante la eliminación.");
+				response.setData(result);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/find/criteria")
+	public @ResponseBody ResponseDataDTO findByCriteria(@RequestBody FilterReporteDTO filter) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			List<EventoDTO> list = service.listarEventoByCriteriaFilter(filter);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("Lista recuperada correctamente.");
+			response.setData(list);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
 	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/persona")
