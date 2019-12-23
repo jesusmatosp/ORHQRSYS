@@ -23,7 +23,8 @@ public class EventoDTO implements Serializable {
 	private Date fechaModifica;
 	private List<EventoHorarioDTO> horarioDTO;
 	private ProfesorDTO profesorDTO;
-	
+	private String activo;
+
 	public Long getIdEvento() {
 		return idEvento;
 	}
@@ -113,6 +114,12 @@ public class EventoDTO implements Serializable {
 	}
 	public void setHorarioDTO(List<EventoHorarioDTO> horarioDTO) {
 		this.horarioDTO = horarioDTO;
+	}
+	public String getActivo() {
+		return activo;
+	}
+	public void setActivo(String activo) {
+		this.activo = activo;
 	}
 
 

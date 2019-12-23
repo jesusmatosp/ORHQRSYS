@@ -49,6 +49,25 @@ public class ProfesorController {
 	}
 	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/login")
+	public @ResponseBody ResponseDataDTO login(@RequestBody ProfesorDTO profesorDTO) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			profesorDTO = service.loginProfesor(profesorDTO);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("Validado correctamente");
+			response.setData(profesorDTO);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@GetMapping("/all")
 	public @ResponseBody ResponseDataDTO all() {
 		ResponseDataDTO response = new ResponseDataDTO();

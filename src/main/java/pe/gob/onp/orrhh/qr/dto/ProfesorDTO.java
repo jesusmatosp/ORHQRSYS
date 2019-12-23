@@ -22,6 +22,9 @@ public class ProfesorDTO implements Serializable{
 	private Date fechaCreacion;
 	private String usuarioModifica;
 	private Date fechaModifica;
+	private String passwordSistema;
+	
+	
 	public Long getIdProfesor() {
 		return idProfesor;
 	}
@@ -99,6 +102,12 @@ public class ProfesorDTO implements Serializable{
 	}
 	public void setFechaModifica(Date fechaModifica) {
 		this.fechaModifica = fechaModifica;
+	}
+	public String getPasswordSistema() {
+		return passwordSistema;
+	}
+	public void setPasswordSistema(String passwordSistema) {
+		this.passwordSistema = passwordSistema;
 	}
 	
 	

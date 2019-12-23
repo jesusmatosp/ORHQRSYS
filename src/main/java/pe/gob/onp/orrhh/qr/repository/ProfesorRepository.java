@@ -22,4 +22,11 @@ public interface ProfesorRepository extends CrudRepository<Profesor, Long>, JpaS
 	
 	@Query("SELECT p FROM Profesor p WHERE p.activo = 'A'")
 	public List<Profesor> findAllActive(); 
+	
+	@Query("SELECT p FROM Profesor p WHERE p.dni = :dni AND p.passwordSistema = :password ")
+	public Profesor login(@Param("dni") String dni, @Param("password") String password);
+	
+	@Query("SELECT p FROM Profesor p WHERE p.dni = :dni ")
+	public Profesor findByDni(@Param("dni") String dni);
+	
 }

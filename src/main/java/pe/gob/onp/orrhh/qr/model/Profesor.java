@@ -63,6 +63,9 @@ public class Profesor {
 	@Column(name = "FECHA_MODIFICA")
 	private Date fechaModifica;
 	
+	@Column( name = "PASSWORD_SISTEMA" )
+	private String passwordSistema;
+	
 	// @OneToOne(mappedBy = "profesor" )
 //	@ManyToOne(fetch = FetchType.LAZY)
 //	@JoinColumn( name = "ID_PROFESOR", nullable = false)
@@ -154,5 +157,11 @@ public class Profesor {
 //	public void setEvento(Evento evento) {
 //		this.evento = evento;
 //	}
+	public String getPasswordSistema() {
+		return passwordSistema;
+	}
+	public void setPasswordSistema(String passwordSistema) {
+		this.passwordSistema = passwordSistema;
+	}
 	
 }
