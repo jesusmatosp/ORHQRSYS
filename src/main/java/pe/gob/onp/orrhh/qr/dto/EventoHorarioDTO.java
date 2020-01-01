@@ -1,6 +1,7 @@
 package pe.gob.onp.orrhh.qr.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class EventoHorarioDTO implements Serializable {
 
@@ -9,6 +10,7 @@ public class EventoHorarioDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Long idEventoHorario;
+	private List<String> dias;
 	private String dia;
 	private String horaInicio;
 	private String horaFin;
@@ -43,6 +45,12 @@ public class EventoHorarioDTO implements Serializable {
 //	public void setEvento(EventoDTO evento) {
 //		this.evento = evento;
 //	}
+	public List<String> getDias() {
+		return dias;
+	}
+	public void setDias(List<String> dias) {
+		this.dias = dias;
+	}
 	
 	
 }

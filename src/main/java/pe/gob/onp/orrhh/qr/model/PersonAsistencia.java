@@ -35,6 +35,12 @@ public class PersonAsistencia {
 	@Column( name = "ESTADO" )
 	private String estado;
 	
+	@Column( name = "HORA_ASISTENCIA" )
+	private String horaAsistencia;
+	
+	@Column( name = "ID_EVENTO_HORARIO" )
+	private Long idEventoHorario;
+	
 	public Long getIdAsistencia() {
 		return idAsistencia;
 	}
@@ -64,6 +70,18 @@ public class PersonAsistencia {
 	}
 	public void setEstado(String estado) {
 		this.estado = estado;
+	}
+	public Long getIdEventoHorario() {
+		return idEventoHorario;
+	}
+	public void setIdEventoHorario(Long idEventoHorario) {
+		this.idEventoHorario = idEventoHorario;
+	}
+	public String getHoraAsistencia() {
+		return horaAsistencia;
+	}
+	public void setHoraAsistencia(String horaAsistencia) {
+		this.horaAsistencia = horaAsistencia;
 	} 
 	
 }

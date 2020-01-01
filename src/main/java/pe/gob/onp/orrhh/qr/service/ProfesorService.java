@@ -43,14 +43,12 @@ public class ProfesorService {
 				if(profesorDTO.getIdProfesor() != null) {
 					Optional<Profesor> tmp = repository.findById(profesorDTO.getIdProfesor());
 					if(tmp == null) throw new ProfesorException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROFESOR_NOT_FOUND, null, Locale.US));
-					
-					Profesor profesor = repository.findByDni(profesorDTO.getDni());
-					if(profesor != null) throw new ProfesorException("Este DNI o CE ya fue registrado en el sistema ");
-					
 					profesorDTO.setUsuarioCreacion(tmp.get().getUsuarioCreacion());
 					profesorDTO.setFechaCreacion(tmp.get().getFechaCreacion());
 					profesorDTO.setFechaModifica(DateUtilitario.getCurrentDate());
 				} else {
+					Profesor profesor = repository.findByDni(profesorDTO.getDni());
+					if(profesor != null) throw new ProfesorException("Este DNI o CE ya fue registrado en el sistema ");
 					profesorDTO.setFechaCreacion(DateUtilitario.getCurrentDate());
 				}
 				Profesor profesor = new Profesor();

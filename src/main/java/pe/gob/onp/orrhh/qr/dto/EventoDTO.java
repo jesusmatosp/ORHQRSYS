@@ -15,6 +15,8 @@ public class EventoDTO implements Serializable {
 	private String tipoEvento;
 	private Integer cantidadParticipantes;
 	private Date fechaInicio;
+	private String strFechaInicio;
+	private String strFechaCierre;
 	private Date fechaCierre;
 	private Integer duracionHoras;
 	private String usuarioCreacion;
@@ -22,6 +24,7 @@ public class EventoDTO implements Serializable {
 	private String usuarioModifica;
 	private Date fechaModifica;
 	private List<EventoHorarioDTO> horarioDTO;
+	private List<HorarioEventoDTO> horarioGroup;
 	private ProfesorDTO profesorDTO;
 	private String activo;
 
@@ -120,6 +123,24 @@ public class EventoDTO implements Serializable {
 	}
 	public void setActivo(String activo) {
 		this.activo = activo;
+	}
+	public String getStrFechaInicio() {
+		return strFechaInicio;
+	}
+	public void setStrFechaInicio(String strFechaInicio) {
+		this.strFechaInicio = strFechaInicio;
+	}
+	public String getStrFechaCierre() {
+		return strFechaCierre;
+	}
+	public void setStrFechaCierre(String strFechaCierre) {
+		this.strFechaCierre = strFechaCierre;
+	}
+	public List<HorarioEventoDTO> getHorarioGroup() {
+		return horarioGroup;
+	}
+	public void setHorarioGroup(List<HorarioEventoDTO> horarioGroup) {
+		this.horarioGroup = horarioGroup;
 	}
 
 

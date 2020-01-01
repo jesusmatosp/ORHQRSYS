@@ -13,14 +13,17 @@ import org.springframework.stereotype.Service;
 import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.model.Evento;
+import pe.gob.onp.orrhh.qr.model.EventoHorario;
 import pe.gob.onp.orrhh.qr.model.PersonAsistencia;
 import pe.gob.onp.orrhh.qr.model.Persona;
 import pe.gob.onp.orrhh.qr.model.PersonaEvento;
 import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
+import pe.gob.onp.orrhh.qr.repository.EventoHorarioRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaRepository;
+import pe.gob.onp.orrhh.qr.type.DiaType;
 import pe.gob.onp.orrhh.qr.utilitario.Constantes;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
 import pe.gob.onp.orrhh.qr.utilitario.exception.PersonaException;
@@ -45,6 +48,9 @@ public class PersonaService {
 	@Autowired
 	private EventoRepository eventoRepository;
 	
+	@Autowired
+	private EventoHorarioRepository eventoHorarioRepository;
+	
 	public PersonaDTO guardarDatosPersona(PersonaDTO personaDTO) throws PersonaException {
 		try {
 			Persona persona = new Persona();
@@ -62,6 +68,15 @@ public class PersonaService {
 	public PersonaAsistenciaDTO marcarAsistencia(PersonaAsistenciaDTO asistencia) throws PersonaException {
 		PersonaAsistenciaDTO pAsistencia = new PersonaAsistenciaDTO();
 		try {
+			
+			// Validar dia:
+			// Obtener dia:
+			Integer iDia = DateUtilitario.getDiaSemana(DateUtilitario.getCurrentDate());
+			String sDia = DiaType.get(iDia).getValue();
+			String sHora = DateUtilitario.getHoraActual(DateUtilitario.getCurrentDate());
+			List<EventoHorario> eventoHorario = eventoHorarioRepository.getEventoByDiaHora(asistencia.getIdEvento(), sDia, sHora);
+			if(eventoHorario.isEmpty()) throw new PersonaException("El Evento o Curso no se encuentra disponible en estos momentos para el registro de asistencia.");
+			
 			// Validar Evento existe:
 			List<Evento> evento = eventoRepository.findEventoByIdFechas(asistencia.getIdEvento(), DateUtilitario.getCurrentDate());
 			if(evento.isEmpty()) throw new PersonaException("Código Inválido, el evento o curso no existe o no está activo");
@@ -78,9 +93,16 @@ public class PersonaService {
 			asistencia.setFechaAsistencia(DateUtilitario.getCurrentDate());
 			PersonAsistencia pa = new PersonAsistencia();
 			BeanUtils.copyProperties(pa, asistencia);
+			EventoHorario evtHora = eventoHorario.get(0);
+			pa.setIdEventoHorario(evtHora.getIdEventoHorario());
+			pa.setHoraAsistencia(sHora);
 			asistRepository.save(pa);
 			pAsistencia.setResult(true);
 			pAsistencia.setEstado("OK");
+			
+			// Get Cantidad:
+			
+			
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());
 			throw new PersonaException(e.getLocalizedMessage());

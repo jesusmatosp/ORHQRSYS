@@ -1,11 +1,6 @@
 package pe.gob.onp.orrhh.qr.controller;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,34 +12,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperPrint;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
-import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
 import pe.gob.onp.orrhh.qr.service.EventoService;
-import pe.gob.onp.orrhh.qr.service.MailService;
 
 @RestController
 @RequestMapping( value = "/api/evento" )
-public class EventoConroller {
+public class EventoController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(EventoConroller.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EventoController.class);
 	@Autowired
 	private EventoService service;
 	
 	@Autowired
 	private MessageSource messageSource;
-	
-	
 	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/create")
@@ -64,6 +49,25 @@ public class EventoConroller {
 		}
 		return response;
 	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/create/clone")
+	public @ResponseBody ResponseDataDTO clonarEvento(@RequestBody List<Long> idEventos) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			List<EventoDTO> eventoDTO = service.clonarEvento(idEventos);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("El registro del Evento se clonó correctamente.");
+			response.setData(eventoDTO);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	} 
 	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@GetMapping("/all")

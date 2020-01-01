@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -27,6 +28,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.lowagie.text.pdf.AcroFields.Item;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -38,6 +41,7 @@ import pe.gob.onp.orrhh.qr.dto.AsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoHorarioDTO;
 import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
+import pe.gob.onp.orrhh.qr.dto.HorarioEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ProfesorDTO;
@@ -50,6 +54,7 @@ import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
 import pe.gob.onp.orrhh.qr.model.Proceso;
 import pe.gob.onp.orrhh.qr.model.Profesor;
 import pe.gob.onp.orrhh.qr.repository.AsistenteSedeRepository;
+import pe.gob.onp.orrhh.qr.repository.EventoHorarioRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoAsistenciaRepository;
@@ -72,6 +77,9 @@ public class EventoService {
 	
 	@Autowired
 	private EventoRepository repository;
+	
+	@Autowired
+	private EventoHorarioRepository eventoHorarioRepository;
 	
 	@Autowired
 	private ProfesorRepository profesorRepository;
@@ -112,12 +120,15 @@ public class EventoService {
 					eventoDTO.setUsuarioCreacion(optional.get().getUsuarioCreacion());
 					eventoDTO.setFechaCreacion(optional.get().getFechaCreacion());
 					eventoDTO.setFechaModifica(DateUtilitario.getCurrentDate());
+					eventoHorarioRepository.eliminarHorariosByIdEvento(eventoDTO.getIdEvento());
 				} else {
 					eventoDTO.setFechaCreacion(DateUtilitario.getCurrentDate());
 				}
 				Evento evento = new Evento();
 				BeanUtils.copyProperties(evento, eventoDTO);
-				
+				// Convert....
+				evento.setFechaInicio(DateUtilitario.convertStringToDate(eventoDTO.getStrFechaInicio(), "yyyy-MM-dd"));
+				evento.setFechaCierre(DateUtilitario.convertStringToDate(eventoDTO.getStrFechaCierre(), "yyyy-MM-dd"));
 				// Obtener Datos docente:
 				Profesor profesor = new Profesor();
 				BeanUtils.copyProperties(profesor, eventoDTO.getProfesorDTO());
@@ -125,10 +136,14 @@ public class EventoService {
 				List<EventoHorario> horarios = new ArrayList<EventoHorario>();
 				List<EventoHorarioDTO> lstHorarioDTO = eventoDTO.getHorarioDTO();
 				for(EventoHorarioDTO horarioDTO : lstHorarioDTO) {
-					EventoHorario eventoHorario = new EventoHorario();
-					BeanUtils.copyProperties(eventoHorario, horarioDTO);
-					eventoHorario.setEvento(evento);
-					horarios.add(eventoHorario);
+					List<String> dias = horarioDTO.getDias();
+					for(String dia: dias) {
+						EventoHorario eventoHorario = new EventoHorario();
+						BeanUtils.copyProperties(eventoHorario, horarioDTO);
+						eventoHorario.setDia(dia);
+						eventoHorario.setEvento(evento);
+						horarios.add(eventoHorario);
+					}
 				}
 				evento.setIdProfesor(profesor.getIdProfesor());
 				evento.setHorario(horarios);
@@ -188,6 +203,7 @@ public class EventoService {
 				if( filter.getSede() != null ) {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("sede"), filter.getSede())));
 				}
+				predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("activo"), Constantes.ESTADO_ACTIVO_VALUE)));
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
 		});
@@ -214,6 +230,12 @@ public class EventoService {
 						BeanUtils.copyProperties(eventoHorarioDTO, evt);
 						horariosDTO.add(eventoHorarioDTO);
 					}
+					
+					// Agrupar:
+				 	List<HorarioEventoDTO> lstHorario = new ArrayList<HorarioEventoDTO>(); 
+				 	lstHorario = repository.findHorarioByEventoId(item.getIdEvento());
+					eventoDTO.setHorarioGroup(lstHorario);
+				 	 
 					BeanUtils.copyProperties(eventoDTO, item);
 					eventoDTO.setProfesorDTO(profesorDTO);
 					eventoDTO.setHorarioDTO(horariosDTO);
@@ -222,6 +244,38 @@ public class EventoService {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			});
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw new EventoException(e.getLocalizedMessage());
+		}
+		return list;
+	}
+	
+	public List<EventoDTO> clonarEvento(List<Long> idEventos) throws EventoException {
+		EventoDTO eventoCloneDTO = new EventoDTO();
+		List<EventoDTO> list = new ArrayList<EventoDTO>();
+		
+		try {
+			for(Long id:idEventos) {
+				Optional<Evento> optional = repository.findById(id);
+				if(optional == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_NOT_FOUND, null, Locale.US));
+				Evento evento = optional.get();
+				Evento oEvento = new Evento();
+				BeanUtils.copyProperties(oEvento, evento);
+				oEvento.setIdEvento(null);
+				List<EventoHorario> lstEvtHorario = new ArrayList<EventoHorario>();
+				for(EventoHorario eh: oEvento.getHorario()) {
+					EventoHorario oEvtHorario = new EventoHorario();
+					BeanUtils.copyProperties(oEvtHorario, eh);
+					oEvtHorario.setIdEventoHorario(null);
+					oEvtHorario.setEvento(oEvento);
+					lstEvtHorario.add(oEvtHorario);
+				}
+				oEvento.setHorario(lstEvtHorario);
+				Evento eventoClone = repository.save(oEvento);
+				eventoCloneDTO = obtenerEventoById(eventoClone.getIdEvento());
+				list.add(eventoCloneDTO);
+			}
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			throw new EventoException(e.getLocalizedMessage());
@@ -242,7 +296,6 @@ public class EventoService {
 				Profesor profesor = oProfesor.get();
 				BeanUtils.copyProperties(profesorDTO, profesor);
 			};
-			
 			List<EventoHorario> horario = evento.getHorario();
 			List<EventoHorarioDTO> horarioDTO = new ArrayList<EventoHorarioDTO>();
 			for(EventoHorario eventoHorario: horario) {
@@ -250,9 +303,12 @@ public class EventoService {
 				BeanUtils.copyProperties(eventoHorarioDTO, eventoHorario);
 				horarioDTO.add(eventoHorarioDTO);
 			}
-			
 			//  Setter:
 			BeanUtils.copyProperties(eventoDTO, evento);
+			// Agrupar:
+		 	 List<HorarioEventoDTO> lstHorario = repository.findHorarioByEventoId(eventoDTO.getIdEvento());
+			eventoDTO.setHorarioGroup(lstHorario);
+			
 			eventoDTO.setProfesorDTO(profesorDTO);
 			eventoDTO.setHorarioDTO(horarioDTO);
 			
@@ -288,6 +344,11 @@ public class EventoService {
 					BeanUtils.copyProperties(eventoHorarioDTO, h);
 					lstHorario.add(eventoHorarioDTO);
 				}
+				
+				// Agrupar:
+			 	 List<HorarioEventoDTO> lstHorarioGroup = repository.findHorarioByEventoId(eventoDTO.getIdEvento());
+				eventoDTO.setHorarioGroup(lstHorarioGroup);
+				
 				eventoDTO.setProfesorDTO(profesorDTO);
 				eventoDTO.setHorarioDTO(lstHorario);
 				list.add(eventoDTO);
@@ -368,8 +429,8 @@ public class EventoService {
 		if(eventoDTO.getSede() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_SEDE, null, Locale.US));
 		if(eventoDTO.getTipoEvento() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_TIPO_EVENTO, null, Locale.US));
 		if(eventoDTO.getCantidadParticipantes() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_CANTIDAD, null, Locale.US));
-		if(eventoDTO.getFechaInicio() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_FECHA_INICIO, null, Locale.US));
-		if(eventoDTO.getFechaCierre() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_FECHA_FIN, null, Locale.US));
+		if(eventoDTO.getStrFechaInicio() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_FECHA_INICIO, null, Locale.US));
+		if(eventoDTO.getStrFechaCierre() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_FECHA_FIN, null, Locale.US));
 		if(eventoDTO.getDuracionHoras() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_FECHA_FIN, null, Locale.US));
 		if(eventoDTO.getUsuarioCreacion() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_USUARIO_CREACION, null, Locale.US));
 //		if(eventoDTO.getUsuarioModifica() == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_USUARIO_MODIFICACION, null, Locale.US));
