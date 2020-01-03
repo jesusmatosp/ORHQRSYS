@@ -390,6 +390,24 @@ public class EventoService {
 		}
 	}
 	
+	public boolean reenviarCodQR(List<PersonaEvento> list) throws EventoException, Exception {
+		boolean result = true;
+		for(PersonaEvento personaEvento: list) {
+			Optional<Evento> optEvento = repository.findById(personaEvento.getId().getIdEvento());
+			if(optEvento == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_EVENTO_NOT_FOUND, null, Locale.US));
+			Evento evt = optEvento.get();
+			Optional<Persona> oPersona = personaRepository.findById(Integer.parseInt(String.valueOf(personaEvento.getId().getIdPersona())));
+			Persona persona = oPersona.get();
+			// Notificar:
+			String emailBody = MailTemplateUtil.templateQRCode(persona, evt);
+			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
+					false, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, persona.getCodQR(), 
+								persona.getDni() + UUID.randomUUID() ,
+								"png");
+		}
+		return result;
+	}
+	
 	public void guardarPersonaEvento(PersonaEventoDTO personaEventoDTO) throws EventoException {
 		PersonaEvento personaEvento = new PersonaEvento();
 		PersonaEventoPK id = new PersonaEventoPK();

@@ -18,6 +18,7 @@ import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
+import pe.gob.onp.orrhh.qr.model.PersonaEvento;
 import pe.gob.onp.orrhh.qr.service.EventoService;
 
 @RestController
@@ -190,5 +191,26 @@ public class EventoController {
 		}
 		return response;
 	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/reenviar/qr")
+	public @ResponseBody ResponseDataDTO reenviarCodQR(@RequestBody List<PersonaEvento> list) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			boolean result = service.reenviarCodQR(list);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(result);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	
 
 }

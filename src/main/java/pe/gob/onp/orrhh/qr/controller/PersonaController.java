@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +24,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import pe.gob.onp.orrhh.qr.bean.PersonaEventoBean;
 import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
 import pe.gob.onp.orrhh.qr.model.Persona;
 import pe.gob.onp.orrhh.qr.model.Proceso;
-import pe.gob.onp.orrhh.qr.service.MailService;
 import pe.gob.onp.orrhh.qr.service.PersonaService;
 import pe.gob.onp.orrhh.qr.service.ProcesoService;
+import pe.gob.onp.orrhh.qr.utilitario.Constantes;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
 import pe.gob.onp.orrhh.qr.utilitario.JavaPOI;
-import pe.gob.onp.orrhh.qr.utilitario.MailTemplateUtil;
 import pe.gob.onp.orrhh.qr.utilitario.ONPUtilitarios;
 import pe.gob.onp.orrhh.qr.utilitario.exception.PersonaException;
 
@@ -76,6 +73,7 @@ public class PersonaController {
 				BeanUtils.copyProperties(oPersona, p);
 				oPersona.setProceso(proceso);
 				oPersona.setUsuarioCarga(usuarioEjecucion);
+				oPersona.setActivo(Constantes.ESTADO_ACTIVO_VALUE);
 				list.add(oPersona);
 			}
 			proceso.setPersonas(list);
@@ -130,4 +128,43 @@ public class PersonaController {
 		}
 		return response;
 	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/evento")
+	public @ResponseBody ResponseDataDTO getListaPersonaEvento(@RequestBody PersonaEventoBean bean) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			List<PersonaEventoBean> list = service.getPersonaEventoByCriteria(bean);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(list);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/baja")
+	public @ResponseBody ResponseDataDTO bajaPersonal(@RequestBody List<Integer> idPersonas) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			boolean result = service.bajaPersona(idPersonas);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(result);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
 }

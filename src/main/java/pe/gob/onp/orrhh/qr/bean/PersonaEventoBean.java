@@ -1,29 +1,23 @@
-package pe.gob.onp.orrhh.qr.model;
+package pe.gob.onp.orrhh.qr.bean;
 
+import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
-@Table( name = "PERSONA", schema = "ORHQRSYS")
-public class Persona {
+@Table( name = "V_PERSONA_EVENTO" )
+public class PersonaEventoBean implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SQ_ID_PERSONA")
-	@SequenceGenerator(sequenceName = "SQ_ID_PERSONA", allocationSize = 1, name = "SQ_ID_PERSONA")
 	@Column( name = "ID_PERSONA" )
-	private Integer idPersona;
+	private Long idPersona;
 	
 	@Column( name = "DNI" )
 	private String dni;
@@ -47,13 +41,13 @@ public class Persona {
 	private String puesto;
 	
 	@Column( name = "AREA_OPERATIVA" )
-	private String areaCorporativa;
+	private String areaOperativa;
 	
 	@Column( name = "TELEFONO" )
 	private String telefono;
 	
 	@Column( name = "FECHA_INGRESO" )
-	private Date fechaIngreso;
+	private String fechaIngreso;
 	
 	@Column( name = "CORREO_CORPORATIVO" )
 	private String correoCorporativo;
@@ -61,27 +55,37 @@ public class Persona {
 	@Column( name = "CORREO_PERSONAL" )
 	private String correoPersonal;
 	
-	@Lob
 	@Column( name = "COD_QR" )
 	private byte[] codQR;
 	
-	@Column( name = "FECHA_CARGA" )
-	private Date fechaCarga;
+	@Column( name = "TIPO_EVENTO" )
+	private String tipoEvento;
 	
-	@Column( name = "USUARIO_CARGA" )
-	private String usuarioCarga;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn( name = "ID_PROCESO" , nullable = false)
-	private Proceso proceso;
+	@Column( name = "NOMBRE_EVENTO" )
+	private String nombreEvento;
 	
-	@Column( name = "ACTIVO" )
-	private String activo;
+	@Column( name = "ID_EVENTO" )
+	private Long idEvento;
 	
-	public Integer getIdPersona() {
+	@Column( name = "FECHA_INICIO" )
+	private Date fechaInicio;
+	
+	@Column( name = "FECHA_CIERRE" )
+	private Date fechaCierre;
+	
+	@Column( name = "SEDE" )
+	private String sede;
+	
+	@Transient
+	private String strFechaInicio;
+	
+	@Transient
+	private String strFechaFin;
+	
+	public Long getIdPersona() {
 		return idPersona;
 	}
-	public void setIdPersona(Integer idPersona) {
+	public void setIdPersona(Long idPersona) {
 		this.idPersona = idPersona;
 	}
 	public String getDni() {
@@ -126,11 +130,11 @@ public class Persona {
 	public void setPuesto(String puesto) {
 		this.puesto = puesto;
 	}
-	public String getAreaCorporativa() {
-		return areaCorporativa;
+	public String getAreaOperativa() {
+		return areaOperativa;
 	}
-	public void setAreaCorporativa(String areaCorporativa) {
-		this.areaCorporativa = areaCorporativa;
+	public void setAreaOperativa(String areaOperativa) {
+		this.areaOperativa = areaOperativa;
 	}
 	public String getTelefono() {
 		return telefono;
@@ -138,10 +142,10 @@ public class Persona {
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
 	}
-	public Date getFechaIngreso() {
+	public String getFechaIngreso() {
 		return fechaIngreso;
 	}
-	public void setFechaIngreso(Date fechaIngreso) {
+	public void setFechaIngreso(String fechaIngreso) {
 		this.fechaIngreso = fechaIngreso;
 	}
 	public String getCorreoCorporativo() {
@@ -156,34 +160,61 @@ public class Persona {
 	public void setCorreoPersonal(String correoPersonal) {
 		this.correoPersonal = correoPersonal;
 	}
-	public Date getFechaCarga() {
-		return fechaCarga;
-	}
-	public void setFechaCarga(Date fechaCarga) {
-		this.fechaCarga = fechaCarga;
-	}
-	public String getUsuarioCarga() {
-		return usuarioCarga;
-	}
-	public void setUsuarioCarga(String usuarioCarga) {
-		this.usuarioCarga = usuarioCarga;
-	}
-	public Proceso getProceso() {
-		return proceso;
-	}
-	public void setProceso(Proceso proceso) {
-		this.proceso = proceso;
-	}
 	public byte[] getCodQR() {
 		return codQR;
 	}
 	public void setCodQR(byte[] codQR) {
 		this.codQR = codQR;
 	}
-	public String getActivo() {
-		return activo;
+	public String getTipoEvento() {
+		return tipoEvento;
 	}
-	public void setActivo(String activo) {
-		this.activo = activo;
+	public void setTipoEvento(String tipoEvento) {
+		this.tipoEvento = tipoEvento;
 	}
+	public String getNombreEvento() {
+		return nombreEvento;
+	}
+	public void setNombreEvento(String nombreEvento) {
+		this.nombreEvento = nombreEvento;
+	}
+	public Long getIdEvento() {
+		return idEvento;
+	}
+	public void setIdEvento(Long idEvento) {
+		this.idEvento = idEvento;
+	}
+	public Date getFechaInicio() {
+		return fechaInicio;
+	}
+	public void setFechaInicio(Date fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+	public Date getFechaCierre() {
+		return fechaCierre;
+	}
+	public void setFechaCierre(Date fechaCierre) {
+		this.fechaCierre = fechaCierre;
+	}
+	public String getSede() {
+		return sede;
+	}
+	public void setSede(String sede) {
+		this.sede = sede;
+	}
+	public String getStrFechaInicio() {
+		return strFechaInicio;
+	}
+	public void setStrFechaInicio(String strFechaInicio) {
+		this.strFechaInicio = strFechaInicio;
+	}
+	public String getStrFechaFin() {
+		return strFechaFin;
+	}
+	public void setStrFechaFin(String strFechaFin) {
+		this.strFechaFin = strFechaFin;
+	}
+	
+	
+	
 }

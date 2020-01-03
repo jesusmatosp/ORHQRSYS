@@ -1,15 +1,26 @@
 package pe.gob.onp.orrhh.qr.service;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import pe.gob.onp.orrhh.qr.bean.PersonaEventoBean;
 import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.model.Evento;
@@ -21,6 +32,7 @@ import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
 import pe.gob.onp.orrhh.qr.repository.EventoHorarioRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaEventoBeanRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaRepository;
 import pe.gob.onp.orrhh.qr.type.DiaType;
@@ -50,6 +62,9 @@ public class PersonaService {
 	
 	@Autowired
 	private EventoHorarioRepository eventoHorarioRepository;
+	
+	@Autowired
+	private PersonaEventoBeanRepository personaEventoViewRepository;
 	
 	public PersonaDTO guardarDatosPersona(PersonaDTO personaDTO) throws PersonaException {
 		try {
@@ -118,5 +133,50 @@ public class PersonaService {
 		if(personaDTO.getCorreoCorporativo()  == null ) throw new PersonaException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PERSONA_CORREO_CORPORATIVO, null, Locale.US));
 		return true;
 	}
+	
+	
+	public boolean bajaPersona(List<Integer> ids) throws PersonaException {
+		boolean result = true;
+		try {
+			repository.inactivarPersonas(ids);
+		} catch (Exception e) {
+			result = false;
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			throw new PersonaException(e.getLocalizedMessage());
+		}
+		return result;
+	}
+	
+	public List<PersonaEventoBean> getPersonaEventoByCriteria(PersonaEventoBean requestSearch) throws PersonaException {
+		return personaEventoViewRepository.findAll(new Specification<PersonaEventoBean>() {
+			@Override
+			public Predicate toPredicate(Root<PersonaEventoBean> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				// Obligatorios:
+				predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("tipoEvento"), requestSearch.getTipoEvento()))); // tipo de evento
+				predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), requestSearch.getIdEvento()))); // id evento
+				Date fechaInicio = null;
+				Date fechaFin = null;
+				try {
+					fechaInicio = DateUtilitario.convertStringToDate(requestSearch.getStrFechaInicio());
+					fechaFin = DateUtilitario.convertStringToDate(requestSearch.getStrFechaFin());
+				} catch (ParseException e) {
+					e.printStackTrace();
+					LOG.error(e.getLocalizedMessage());
+				}
+				predicates.add(criteriaBuilder.and(criteriaBuilder.between(root.get("fechaInicio"), fechaInicio, fechaFin))); // id evento
+				if(requestSearch.getSede() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), requestSearch.getSede())));
+				}
+				if(requestSearch.getDni() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), requestSearch.getDni())));
+				}
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
+	
 	
 }
