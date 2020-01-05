@@ -384,8 +384,10 @@ public class EventoService {
 
 			// Notificar:
 			String emailBody = MailTemplateUtil.templateQRCode(persona, evt);
+			List<String> cc = new ArrayList<String>();
+			cc.add(persona.getCorreoPersonal());
 			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
-					false, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
+					true, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
 					"png");
 		}
 	}

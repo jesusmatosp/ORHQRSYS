@@ -147,6 +147,46 @@ public class PersonaService {
 		return result;
 	}
 	
+	public List<PersonaDTO> findPersona(PersonaDTO personaDTO) throws PersonaException {
+		List<PersonaDTO> list = new ArrayList<PersonaDTO>();
+		try {
+			List<Persona> personas = findPersonaByCriteria(personaDTO);
+			for(Persona p: personas) {
+				PersonaDTO oPersona = new PersonaDTO();
+				BeanUtils.copyProperties(oPersona, p);
+				list.add(oPersona);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			throw new PersonaException(e.getLocalizedMessage());
+		}
+		return list;
+	}
+	
+	public List<Persona> findPersonaByCriteria(PersonaDTO personaDTO) throws PersonaException {
+		return repository.findAll(new Specification<Persona>() {
+			@Override
+			public Predicate toPredicate(Root<Persona> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(personaDTO.getDni() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), personaDTO.getDni())));
+				}
+				if(personaDTO.getNombres() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("nombres"), "%" + personaDTO.getNombres().toUpperCase()
+							+ "%")));
+				}
+				if(personaDTO.getApellidoPaterno() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("apellidoPaterno"), "%" + personaDTO.getApellidoPaterno().toUpperCase() + "%")));
+				}
+				if(personaDTO.getApellidoMaterno() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("apellidoMaterno"), "%" + personaDTO.getApellidoMaterno().toUpperCase() + "%")));
+				}
+				// query.groupBy(grouping)
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
+	
 	public List<PersonaEventoBean> getPersonaEventoByCriteria(PersonaEventoBean requestSearch) throws PersonaException {
 		return personaEventoViewRepository.findAll(new Specification<PersonaEventoBean>() {
 			@Override
@@ -158,14 +198,16 @@ public class PersonaService {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), requestSearch.getIdEvento()))); // id evento
 				Date fechaInicio = null;
 				Date fechaFin = null;
-				try {
-					fechaInicio = DateUtilitario.convertStringToDate(requestSearch.getStrFechaInicio());
-					fechaFin = DateUtilitario.convertStringToDate(requestSearch.getStrFechaFin());
-				} catch (ParseException e) {
-					e.printStackTrace();
-					LOG.error(e.getLocalizedMessage());
+				if(requestSearch.getStrFechaInicio() != null && requestSearch.getFechaCierre() != null) {
+					try {
+						fechaInicio = DateUtilitario.convertStringToDate(requestSearch.getStrFechaInicio());
+						fechaFin = DateUtilitario.convertStringToDate(requestSearch.getStrFechaFin());
+					} catch (ParseException e) {
+						e.printStackTrace();
+						LOG.error(e.getLocalizedMessage());
+					}
+					predicates.add(criteriaBuilder.and(criteriaBuilder.between(root.get("fechaInicio"), fechaInicio, fechaFin))); // id evento
 				}
-				predicates.add(criteriaBuilder.and(criteriaBuilder.between(root.get("fechaInicio"), fechaInicio, fechaFin))); // id evento
 				if(requestSearch.getSede() != null) {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), requestSearch.getSede())));
 				}
