@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import pe.gob.onp.orrhh.qr.bean.PersonaBean;
 import pe.gob.onp.orrhh.qr.bean.PersonaEventoBean;
 import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
@@ -168,11 +171,50 @@ public class PersonaController {
 	}
 	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/get")
+	public @ResponseBody ResponseDataDTO getPersonaByDni(@RequestBody PersonaDTO personaDTO) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			PersonaDTO oPersonaDTO = service.getPersonaByDNI(personaDTO.getDni(), personaDTO.getRegimen(), personaDTO.getAreaCorporativa());
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(oPersonaDTO);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/update")
+	public @ResponseBody ResponseDataDTO actualizarPersonas(@RequestBody PersonaDTO personaDTO) {
+		ResponseDataDTO response = new ResponseDataDTO();
+		try {
+			service.modificarDatosPersona(personaDTO);
+			response.setCodigo("100");
+			response.setCodigoHTTP(HttpStatus.OK.name());
+			response.setMessage("OK");
+			response.setData(true);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			response.setCodigo("005");
+			response.setCodigoHTTP(HttpStatus.INTERNAL_SERVER_ERROR.name());
+			response.setMessage(e.getLocalizedMessage());
+		}
+		return response;
+	}
+	
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/find")
 	public @ResponseBody ResponseDataDTO findPersonalByCriteria(@RequestBody PersonaDTO personaDTO) {
 		ResponseDataDTO response = new ResponseDataDTO();
 		try {
-			List<PersonaDTO> list = service.findPersona(personaDTO);
+			List<PersonaBean> list = service.findPersona(personaDTO);
 			response.setCodigo("100");
 			response.setCodigoHTTP(HttpStatus.OK.name());
 			response.setMessage("OK");

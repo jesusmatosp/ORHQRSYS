@@ -387,7 +387,7 @@ public class EventoService {
 			List<String> cc = new ArrayList<String>();
 			cc.add(persona.getCorreoPersonal());
 			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
-					true, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
+					true, cc, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
 					"png");
 		}
 	}

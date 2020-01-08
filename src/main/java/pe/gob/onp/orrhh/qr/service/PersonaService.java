@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -20,6 +21,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import pe.gob.onp.orrhh.qr.bean.PersonaBean;
 import pe.gob.onp.orrhh.qr.bean.PersonaEventoBean;
 import pe.gob.onp.orrhh.qr.dto.PersonaAsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
@@ -35,6 +37,7 @@ import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoBeanRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaRepository;
+import pe.gob.onp.orrhh.qr.repository.PersonaViewRepository;
 import pe.gob.onp.orrhh.qr.type.DiaType;
 import pe.gob.onp.orrhh.qr.utilitario.Constantes;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
@@ -47,6 +50,9 @@ public class PersonaService {
 	
 	@Autowired
 	private PersonaRepository repository;
+	
+	@Autowired
+	private PersonaViewRepository viewRepository;
 	
 	@Autowired
 	private MessageSource messageSource;
@@ -147,15 +153,10 @@ public class PersonaService {
 		return result;
 	}
 	
-	public List<PersonaDTO> findPersona(PersonaDTO personaDTO) throws PersonaException {
-		List<PersonaDTO> list = new ArrayList<PersonaDTO>();
+	public List<PersonaBean> findPersona(PersonaDTO personaDTO) throws PersonaException {
+		List<PersonaBean> list = new ArrayList<PersonaBean>();
 		try {
-			List<Persona> personas = findPersonaByCriteria(personaDTO);
-			for(Persona p: personas) {
-				PersonaDTO oPersona = new PersonaDTO();
-				BeanUtils.copyProperties(oPersona, p);
-				list.add(oPersona);
-			}
+			list = findPersonaByCriteria(personaDTO);
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());
 			throw new PersonaException(e.getLocalizedMessage());
@@ -163,10 +164,10 @@ public class PersonaService {
 		return list;
 	}
 	
-	public List<Persona> findPersonaByCriteria(PersonaDTO personaDTO) throws PersonaException {
-		return repository.findAll(new Specification<Persona>() {
+	public List<PersonaBean> findPersonaByCriteria(PersonaDTO personaDTO) throws PersonaException {
+		return viewRepository.findAll(new Specification<PersonaBean>() {
 			@Override
-			public Predicate toPredicate(Root<Persona> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+			public Predicate toPredicate(Root<PersonaBean> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 				List<Predicate> predicates = new ArrayList<Predicate>();
 				if(personaDTO.getDni() != null) {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), personaDTO.getDni())));
@@ -181,12 +182,13 @@ public class PersonaService {
 				if(personaDTO.getApellidoMaterno() != null) {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("apellidoMaterno"), "%" + personaDTO.getApellidoMaterno().toUpperCase() + "%")));
 				}
-				// query.groupBy(grouping)
+				query.multiselect(root.get("dni"), root.get("regimen"));
+				query.distinct(true);
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
 		});
 	}
-	
+	// 
 	public List<PersonaEventoBean> getPersonaEventoByCriteria(PersonaEventoBean requestSearch) throws PersonaException {
 		return personaEventoViewRepository.findAll(new Specification<PersonaEventoBean>() {
 			@Override
@@ -217,6 +219,44 @@ public class PersonaService {
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
 		});
+	}
+	
+	public void modificarDatosPersona(PersonaDTO personaDTO) throws PersonaException {
+		try {
+			repository.actualizarDatosPersona(personaDTO.getDni(), 
+											personaDTO.getApellidoPaterno(), 
+											personaDTO.getApellidoMaterno(), 
+											personaDTO.getNombres(), 
+											personaDTO.getSexo(), 
+											personaDTO.getRegimen(), 
+											personaDTO.getSexo(), 
+											personaDTO.getAreaCorporativa(), 
+											personaDTO.getTelefono(), 
+											personaDTO.getFechaIngreso(), 
+											personaDTO.getCorreoCorporativo(), 
+											personaDTO.getCorreoPersonal(),
+											personaDTO.getDniOld(),
+											personaDTO.getRegimenOld(),
+											personaDTO.getAreaOperativaOld());
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			throw new PersonaException(e.getLocalizedMessage());
+		}
+	}
+	
+	public PersonaDTO getPersonaByDNI(String dni, String regimen, String areaOperativa) throws PersonaException {
+		PersonaDTO personaDTO = new PersonaDTO();
+		try {
+			List<Persona> personas = repository.getPersonaByDNI(dni, regimen, areaOperativa);
+			if(personas != null) {
+				Persona persona = personas.get(0);
+				BeanUtils.copyProperties(personaDTO, persona);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e.getCause());
+			throw new PersonaException(e.getLocalizedMessage());
+		}
+		return personaDTO;
 	}
 	
 	

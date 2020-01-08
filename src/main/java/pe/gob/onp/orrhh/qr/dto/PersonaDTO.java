@@ -25,6 +25,10 @@ public class PersonaDTO implements Serializable{
 	private byte[] codQR;
 	private Date fechaCarga;
 	private String usuarioCarga;
+	// 
+	private String dniOld;
+	private String areaOperativaOld;
+	private String regimenOld;
 	
 	public Integer getIdPersona() {
 		return idPersona;
@@ -121,6 +125,24 @@ public class PersonaDTO implements Serializable{
 	}
 	public void setCodQR(byte[] codQR) {
 		this.codQR = codQR;
+	}
+	public String getDniOld() {
+		return dniOld;
+	}
+	public void setDniOld(String dniOld) {
+		this.dniOld = dniOld;
+	}
+	public String getAreaOperativaOld() {
+		return areaOperativaOld;
+	}
+	public void setAreaOperativaOld(String areaOperativaOld) {
+		this.areaOperativaOld = areaOperativaOld;
+	}
+	public String getRegimenOld() {
+		return regimenOld;
+	}
+	public void setRegimenOld(String regimenOld) {
+		this.regimenOld = regimenOld;
 	}
 	
 }
