@@ -8,6 +8,13 @@ class OrhqrsysApplicationTests {
 
 	@Test
 	void contextLoads() {
+		String text = null;
+		if(text != null && !text.isEmpty()) {
+			System.out.println("no es vacio");
+		} else {
+			System.out.println("Es vacio");
+		}
+			
 	}
 
 }

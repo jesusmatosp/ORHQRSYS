@@ -54,6 +54,13 @@ public class FilterReporteDTO {
 	public void setFechaFin(String fechaFin) {
 		this.fechaFin = fechaFin;
 	}
+	@Override
+	public String toString() {
+		return "FilterReporteDTO [tipoEvento=" + tipoEvento + ", idCurso=" + idCurso + ", sede=" + sede + ", fecha="
+				+ fecha + ", dni=" + dni + ", fechaInicio=" + fechaInicio + ", fechaFin=" + fechaFin + "]";
+	}
+	
+	
 	
 }
 	
