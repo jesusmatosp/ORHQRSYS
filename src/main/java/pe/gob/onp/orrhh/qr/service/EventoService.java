@@ -2,6 +2,8 @@ package pe.gob.onp.orrhh.qr.service;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -190,18 +192,29 @@ public class EventoService {
 	}
 	
 	public List<Evento> listarEventoByCriteria(FilterReporteDTO filter) throws EventoException {
+		System.out.println(filter.toString());
 		return repository.findAll(new Specification<Evento>() {
 			@Override
 			public Predicate toPredicate(Root<Evento> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 				List<Predicate> predicates = new ArrayList<Predicate>();
-				if(filter.getTipoEvento() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("tipoEvento"), "%" + filter.getTipoEvento() + "%")));
-				}
-				if(filter.getIdCurso() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), filter.getIdCurso())));
-				}
-				if( filter.getSede() != null ) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("sede"), filter.getSede())));
+				try {
+					if(filter.getTipoEvento() != null && !filter.getTipoEvento().isEmpty()) {
+						predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("tipoEvento"), "%" + filter.getTipoEvento() + "%")));
+					}
+					if(filter.getIdCurso() != null && !filter.getIdCurso().equals(0L)) {
+						predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("idEvento"), filter.getIdCurso())));
+					}
+					if( filter.getSede() != null && !filter.getSede().isEmpty()) {
+						predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("sede"), filter.getSede())));
+					}
+					if(filter.getFechaInicio() != null && !filter.getFechaInicio().isEmpty()) {
+						predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("fechaInicio"), new SimpleDateFormat("yyyy-MM-dd").parse(filter.getFechaInicio())));
+					}
+					if(filter.getFechaFin() != null && !filter.getFechaFin().isEmpty()) {
+						predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fechaCierre"), new SimpleDateFormat("yyyy-MM-dd").parse(filter.getFechaFin())));
+					}
+				} catch (Exception e) {
+					LOG.error(e.getLocalizedMessage(), e);
 				}
 				predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("activo"), Constantes.ESTADO_ACTIVO_VALUE)));
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
