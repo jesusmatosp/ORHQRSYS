@@ -177,5 +177,19 @@ public class Evento {
 	public void setActivo(String activo) {
 		this.activo = activo;
 	}
+	@Override
+	public String toString() {
+		return "Evento [idEvento=" + idEvento + ", nombreEvento=" + nombreEvento + ", nombreCorto=" + nombreCorto
+				+ ", sede=" + sede + ", tipoEvento=" + tipoEvento + ", cantidadParticipantes=" + cantidadParticipantes
+				+ ", fechaInicio=" + fechaInicio + ", fechaCierre=" + fechaCierre + ", duracionHoras=" + duracionHoras
+				+ ", usuarioCreacion=" + usuarioCreacion + ", fechaCreacion=" + fechaCreacion + ", usuarioModifica="
+				+ usuarioModifica + ", fechaModifica=" + fechaModifica + ", activo=" + activo + ", horario=" + horario
+				+ ", idProfesor=" + idProfesor + "]";
+	}
+	
+	
+	
+	
+	
 
 }

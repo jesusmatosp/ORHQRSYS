@@ -150,6 +150,7 @@ public class EventoService {
 				}
 				evento.setIdProfesor(profesor.getIdProfesor());
 				evento.setHorario(horarios);
+				LOG.info(evento.toString());
 				evento = repository.save(evento);
 				eventoDTO = obtenerEventoById(evento.getIdEvento());
 			}
