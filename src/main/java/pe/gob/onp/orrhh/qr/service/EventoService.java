@@ -205,7 +205,7 @@ public class EventoService {
 	}
 	
 	public List<Evento> listarEventoByCriteria(FilterReporteDTO filter) throws EventoException {
-		System.out.println(filter.toString());
+		LOG.info("Filtro: "+filter.toString());
 		return repository.findAll(new Specification<Evento>() {
 			@Override
 			public Predicate toPredicate(Root<Evento> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
