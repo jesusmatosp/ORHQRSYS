@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -163,23 +164,34 @@ public class EventoService {
 		List<EventoDTO> listEvento = new ArrayList<EventoDTO>();
 		try {
 			List<Evento> eventos = listarEventoByCriteria(filter);
-			eventos.forEach( evento -> {
+			List<Evento> iteratorSorted = eventos.stream().sorted(Comparator.comparingLong(Evento::getIdEvento).reversed())
+					.collect(Collectors.toList());
+			iteratorSorted.forEach( item -> {
 				try {
-					EventoDTO oEvento = new EventoDTO();
-					BeanUtils.copyProperties(oEvento, evento);
-					List<EventoHorario> horarios = evento.getHorario();
-					List<EventoHorarioDTO> horarioList = new ArrayList<EventoHorarioDTO>();
-					horarios.forEach( horario -> {
-						try {
-							EventoHorarioDTO evtHor = new EventoHorarioDTO();
-							BeanUtils.copyProperties(evtHor, horario);
-							horarioList.add(evtHor);
-						} catch (Exception e) {
-							LOG.error(e.getLocalizedMessage(), e);
-						}
-					});
-					oEvento.setHorarioDTO(horarioList);
-					listEvento.add(oEvento);
+					EventoDTO eventoDTO = new EventoDTO();
+					// Profesor:
+					Optional<Profesor> oProfesor = profesorRepository.findById(item.getIdProfesor());
+					Profesor profesor = oProfesor.get();
+					ProfesorDTO profesorDTO = new ProfesorDTO();
+					BeanUtils.copyProperties(profesorDTO, profesor);
+					// Horarios:
+					List<EventoHorario> horarios = item.getHorario();
+					List<EventoHorarioDTO> horariosDTO = new ArrayList<EventoHorarioDTO>();
+					for(EventoHorario evt: horarios) {
+						EventoHorarioDTO eventoHorarioDTO = new EventoHorarioDTO();
+						BeanUtils.copyProperties(eventoHorarioDTO, evt);
+						horariosDTO.add(eventoHorarioDTO);
+					}
+					
+					// Agrupar:
+				 	List<HorarioEventoDTO> lstHorario = new ArrayList<HorarioEventoDTO>(); 
+				 	lstHorario = repository.findHorarioByEventoId(item.getIdEvento());
+					eventoDTO.setHorarioGroup(lstHorario);
+				 	 
+					BeanUtils.copyProperties(eventoDTO, item);
+					eventoDTO.setProfesorDTO(profesorDTO);
+					eventoDTO.setHorarioDTO(horariosDTO);
+					listEvento.add(eventoDTO);
 				} catch (Exception e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
@@ -208,10 +220,10 @@ public class EventoService {
 						predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("sede"), filter.getSede())));
 					}
 					if(filter.getFechaInicio() != null && !filter.getFechaInicio().isEmpty()) {
-						predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("fechaInicio"), new SimpleDateFormat("yyyy-MM-dd").parse(filter.getFechaInicio())));
+						predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("fechaInicio"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(filter.getFechaInicio() + " 00:00:00")));
 					}
 					if(filter.getFechaFin() != null && !filter.getFechaFin().isEmpty()) {
-						predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fechaCierre"), new SimpleDateFormat("yyyy-MM-dd").parse(filter.getFechaFin())));
+						predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fechaCierre"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(filter.getFechaFin() + " 23:59:59")));
 					}
 				} catch (Exception e) {
 					LOG.error(e.getLocalizedMessage(), e);
@@ -227,7 +239,9 @@ public class EventoService {
 		try {
 			// Iterable<Evento> iterator = repository.findAll();
 			List<Evento> iterator = repository.findAllActive();
-			iterator.forEach(item -> {
+			List<Evento> iteratorSorted = iterator.stream().sorted(Comparator.comparingLong(Evento::getIdEvento).reversed())
+					.collect(Collectors.toList());
+			iteratorSorted.forEach(item -> {
 				try {
 					EventoDTO eventoDTO = new EventoDTO();
 					// Profesor:
