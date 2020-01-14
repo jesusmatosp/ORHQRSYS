@@ -224,7 +224,7 @@ public class EventoService {
 						predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("fechaInicio"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(filter.getFechaInicio() + " 00:00:00")));
 					}
 					if(filter.getFechaFin() != null && !filter.getFechaFin().isEmpty()) {
-						predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fechaCierre"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(filter.getFechaFin() + " 23:59:59")));
+						predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fechaInicio"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(filter.getFechaFin() + " 23:59:59")));
 					}
 				} catch (Exception e) {
 					LOG.error(e.getLocalizedMessage(), e);
