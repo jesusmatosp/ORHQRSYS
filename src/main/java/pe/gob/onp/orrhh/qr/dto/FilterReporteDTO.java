@@ -11,6 +11,7 @@ public class FilterReporteDTO {
 	private String dni;
 	private String fechaInicio;
 	private String fechaFin;
+	private String type;
 	
 	public String getTipoEvento() {
 		return tipoEvento;
@@ -58,6 +59,12 @@ public class FilterReporteDTO {
 	public String toString() {
 		return "FilterReporteDTO [tipoEvento=" + tipoEvento + ", idCurso=" + idCurso + ", sede=" + sede + ", fecha="
 				+ fecha + ", dni=" + dni + ", fechaInicio=" + fechaInicio + ", fechaFin=" + fechaFin + "]";
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 	

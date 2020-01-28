@@ -14,6 +14,9 @@ public class PersonaEventoAsistenteBean implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@Column( name = "ID" )
+	private Long id;
+	
 	@Column( name = "ID_ASISTENCIA" )
 	private Long idAsistencia;
 	
@@ -210,6 +213,14 @@ public class PersonaEventoAsistenteBean implements Serializable{
 
 	public void setHoraAsistencia(String horaAsistencia) {
 		this.horaAsistencia = horaAsistencia;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 }

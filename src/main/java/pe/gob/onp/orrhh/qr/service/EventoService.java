@@ -38,8 +38,13 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import pe.gob.onp.orrhh.qr.bean.AsistenteSedeBen;
+import pe.gob.onp.orrhh.qr.bean.DetailReporteResumenBean;
 import pe.gob.onp.orrhh.qr.bean.PersonaEventoAsistenteBean;
+import pe.gob.onp.orrhh.qr.bean.ReporteDetalladoBean;
+import pe.gob.onp.orrhh.qr.bean.ReporteResumenBean;
 import pe.gob.onp.orrhh.qr.dto.AsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoHorarioDTO;
@@ -49,7 +54,9 @@ import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
 import pe.gob.onp.orrhh.qr.dto.PersonaEventoDTO;
 import pe.gob.onp.orrhh.qr.dto.ProfesorDTO;
 import pe.gob.onp.orrhh.qr.model.Evento;
+import pe.gob.onp.orrhh.qr.model.EventoAsistencia;
 import pe.gob.onp.orrhh.qr.model.EventoHorario;
+import pe.gob.onp.orrhh.qr.model.Parametro;
 import pe.gob.onp.orrhh.qr.model.PersonAsistencia;
 import pe.gob.onp.orrhh.qr.model.Persona;
 import pe.gob.onp.orrhh.qr.model.PersonaEvento;
@@ -57,8 +64,10 @@ import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
 import pe.gob.onp.orrhh.qr.model.Proceso;
 import pe.gob.onp.orrhh.qr.model.Profesor;
 import pe.gob.onp.orrhh.qr.repository.AsistenteSedeRepository;
+import pe.gob.onp.orrhh.qr.repository.EventoAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoHorarioRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoRepository;
+import pe.gob.onp.orrhh.qr.repository.ParametroRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.PersonaEventoRepository;
@@ -94,6 +103,9 @@ public class EventoService {
 	private PersonaRepository personaRepository;
 	
 	@Autowired
+	private ParametroRepository parametroRepository;
+	
+	@Autowired
 	private MessageSource messageSource; 
 	
 	@Autowired
@@ -104,6 +116,9 @@ public class EventoService {
 	
 	@Autowired
 	private PersonaAsistenciaRepository asistenciaRepository;
+	
+	@Autowired
+	private EventoAsistenciaRepository eventoAsistenciaRepository;
 	
 	@Autowired
 	private AsistenteSedeRepository asistenciaSedeRepository;
@@ -487,6 +502,81 @@ public class EventoService {
 		return true;
 	}
 	
+	
+	public ReporteDetalladoBean getListaAsistenciaDetallada(FilterReporteDTO filter) throws EventoException, Exception {
+		ReporteDetalladoBean reporteDetallado = new ReporteDetalladoBean();
+		List<ReporteResumenBean> lstReporteResponse = new ArrayList<ReporteResumenBean>();
+		List<PersonAsistencia> _list2 = asistenciaRepository.getAsistenciaByIdEvento(filter.getIdCurso());
+		List<String> lstColumnas = new ArrayList<String>();
+		Map<Date, List<PersonAsistencia>> columnas = _list2.stream().collect(Collectors.groupingBy(PersonAsistencia::getFechaAsistencia));
+		columnas.forEach((k, v) -> {
+			try {
+				lstColumnas.add(DateUtilitario.convertDatetostring(k));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		});
+		java.util.Collections.sort(lstColumnas);
+		Map<Long, Map<Date, List<PersonAsistencia>> > map = _list2.stream().collect(Collectors.groupingBy(PersonAsistencia::getIdPersona, 
+				Collectors.groupingBy(PersonAsistencia::getFechaAsistencia)));
+		
+		map.forEach((k,v) -> {
+			ReporteResumenBean oReporteResumen = new ReporteResumenBean();
+			// Buscar datos persona:
+			Optional<Persona> oPersona = personaRepository.findById(Integer.parseInt(String.valueOf(k)));
+			if(oPersona != null) {
+				Persona persona = oPersona.get();
+				oReporteResumen.setNombrePersona(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno());
+				PersonaDTO personaDTO = new PersonaDTO();
+				try {
+					BeanUtils.copyProperties(personaDTO, persona);
+					oReporteResumen.setPersona(personaDTO);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+			}
+			
+			oReporteResumen.setIdPersona(k);
+			List<DetailReporteResumenBean> lstDetail = new ArrayList<DetailReporteResumenBean>();
+			for(String columna: lstColumnas) {
+				DetailReporteResumenBean oDetalle = new DetailReporteResumenBean();
+				oDetalle.setFechaAsistencia(columna);
+				oDetalle.setAsistencia("F");
+				lstDetail.add(oDetalle);
+			}
+			Integer contador = 0;
+			v.forEach((a,b) -> {
+				for(DetailReporteResumenBean detalle: lstDetail){
+					try {
+						if (detalle.getFechaAsistencia().equals(DateUtilitario.convertDatetostring(a))){
+							detalle.setAsistencia("A");
+							break;
+						}
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			// Calculando asistencia.
+			for(DetailReporteResumenBean d: lstDetail) {
+				if(d.getAsistencia().equalsIgnoreCase("A")) {
+					contador++;
+				}
+			}
+			
+			oReporteResumen.setDetalle(lstDetail);
+			oReporteResumen.setTotalAsistido(contador);
+			oReporteResumen.setPorcentajeAsistido( Double.parseDouble( "" + (contador * 100)/lstColumnas.size()) );
+			lstReporteResponse.add(oReporteResumen);
+		});
+		
+		reporteDetallado.setData(lstReporteResponse);
+		reporteDetallado.setColumnas(lstColumnas);
+		
+		return reporteDetallado;
+	}
+	
 	// Vistas Soporte:
 	public List<AsistenteSedeBen> getListaAsistentexSede(FilterReporteDTO filter) throws EventoException {
 		return asistenciaSedeRepository.findAll(new Specification<AsistenteSedeBen>() {
@@ -597,19 +687,45 @@ public class EventoService {
 		 return print;
 	}
 	
-	public JasperPrint generarReporteAsistenciaFecha(FilterReporteDTO filter) throws JRException, IOException, EventoException {
+	public JasperPrint generarReporteAsistenciaFecha(FilterReporteDTO filter) throws JRException, IOException, EventoException, Exception {
 		String path = resourceLoader.getResource("classpath:reporteAsistenciaPersona.jrxml").getURI().getPath();
+		String imagen = resourceLoader.getResource("classpath:ic_logo_onp.png").getURI().getPath();
+		
 		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
 		 // Parameters for report
 		 Map<String, Object> parameters = new HashMap<String, Object>();
+		 parameters.put("LOGO_ONP", imagen);
+		 Optional<Evento> oEvento = repository.findById(filter.getIdCurso());
+		 Evento e = oEvento.get();
+		 parameters.put("CODIGO_EVENTO", e.getNombreCorto());
+		
+		 if(filter.getFecha() != null) {
+			 Date fechaMarcacion = DateUtilitario.convertStringToDate(filter.getFecha());
+			 if(fechaMarcacion != null) {
+				 String mes = DateUtilitario.theMonth(DateUtilitario.getMonth(fechaMarcacion));
+				 parameters.put("MES", mes);
+				 parameters.put("FECHA_MARCACION", filter.getFecha());
+			 }
+		 }
+		 
+		 Integer asistidos = 0;
+		 Integer inasistencia = 0;
+		 
 		 List<PersonaEventoAsistenteBean> lista = getListaPersonaEventoAsistencia(filter);
 		 List<Object> data = new ArrayList<>();
 		 for(PersonaEventoAsistenteBean bean: lista) {
+			 if(bean.getFechaAsistencia() != null) {
+				 asistidos++;
+			 } else {
+				 inasistencia ++;
+			 }
 			 data.add(bean);
 		 }
+		 parameters.put("TOTAL_AUSENCIA", "" + inasistencia);
+		 parameters.put("TOTAL_MARCACION", "" + asistidos);
 		// Conexion
 		JasperDataSource dataSource = null;
-		dataSource = new JasperDataSource(AsistenciaDTO.class);
+		dataSource = new JasperDataSource(PersonaEventoAsistenteBean.class);
 		dataSource.addListData(data);
 		JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		return print;
@@ -617,9 +733,20 @@ public class EventoService {
 	
 	public JasperPrint generarReporteAsistenciaSede(FilterReporteDTO filter) throws JRException, IOException, EventoException {
 		String path = resourceLoader.getResource("classpath:reporteAsistenciaSede.jrxml").getURI().getPath();
+		String imagen = resourceLoader.getResource("classpath:ic_logo_onp.png").getURI().getPath();
 		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
 		 // Parameters for report
+		 
+		 // Get Sede y Tipo Evento:
+		 Parametro p1 = parametroRepository.findParametroByCodParametro(filter.getTipoEvento());
+		 Parametro p2 = parametroRepository.findParametroByCodParametro(filter.getSede());
+		 
 		 Map<String, Object> parameters = new HashMap<String, Object>();
+		 parameters.put("LOGO_ONP", imagen);
+		 parameters.put("TIPO_EVENTO", p1.getDescripcion()); 
+		 parameters.put("SEDE", p2.getDescripcion());
+		 parameters.put("DESDE", filter.getFechaInicio());
+		 parameters.put("HASTA", filter.getFechaFin());
 		 List<AsistenteSedeBen> lista = getListaAsistentexSede(filter);
 		 List<Object> data = new ArrayList<>();
 		 for(AsistenteSedeBen bean: lista) {
@@ -627,7 +754,7 @@ public class EventoService {
 		 }
 		// Conexion
 		JasperDataSource dataSource = null;
-		dataSource = new JasperDataSource(AsistenciaDTO.class);
+		dataSource = new JasperDataSource(AsistenteSedeBen.class);
 		dataSource.addListData(data);
 		JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		return print;

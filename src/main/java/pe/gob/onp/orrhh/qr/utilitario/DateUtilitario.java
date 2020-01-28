@@ -1,5 +1,6 @@
 package pe.gob.onp.orrhh.qr.utilitario;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -22,6 +23,23 @@ public class DateUtilitario {
 		Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return new Integer(calendar.get(Calendar.DAY_OF_WEEK));
+	}
+	
+	public static String convertDatetostring(Date date) throws ParseException {
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");  
+		String strDate = dateFormat.format(date);  
+		return strDate;
+	}
+	
+	public static Integer getMonth(Date date) {
+		Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return new Integer(calendar.get(Calendar.MONTH));
+	}
+	
+	public static String theMonth(int month){
+	    String[] monthNames = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"};
+	    return monthNames[month];
 	}
 	
 	public static String getHoraActual(Date date) {

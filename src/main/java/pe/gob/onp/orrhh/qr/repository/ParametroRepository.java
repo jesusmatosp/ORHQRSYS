@@ -15,4 +15,7 @@ public interface ParametroRepository extends CrudRepository<Parametro, Long> {
 	@Query("SELECT p FROM Parametro p WHERE p.codPadre = :codPadre ")
 	public List<Parametro> findParametroByCodPadre(@Param("codPadre") String codPadre);
 	
+	@Query("Select c From Parametro c Where c.codParametro = :codParametro")
+	public Parametro findParametroByCodParametro(@Param("codParametro") String codParametro);
+	
 }

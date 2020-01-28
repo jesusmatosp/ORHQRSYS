@@ -41,6 +41,9 @@ public class PersonAsistencia {
 	@Column( name = "ID_EVENTO_HORARIO" )
 	private Long idEventoHorario;
 	
+	@Column( name = "ID_EVENTO_ASISTENCIA" )
+	private Long idEventoAsistencia;
+	
 	public Long getIdAsistencia() {
 		return idAsistencia;
 	}
@@ -82,6 +85,12 @@ public class PersonAsistencia {
 	}
 	public void setHoraAsistencia(String horaAsistencia) {
 		this.horaAsistencia = horaAsistencia;
-	} 
-	
+	}
+	public Long getIdEventoAsistencia() {
+		return idEventoAsistencia;
+	}
+	public void setIdEventoAsistencia(Long idEventoAsistencia) {
+		this.idEventoAsistencia = idEventoAsistencia;
+	}
+
 }

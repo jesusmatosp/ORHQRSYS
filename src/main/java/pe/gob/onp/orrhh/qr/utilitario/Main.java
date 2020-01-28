@@ -43,7 +43,7 @@ public class Main {
 //        Formatter obj = new Formatter();
 //        String numeroCeros = String.valueOf(obj.format("%02d", numero));
 //        System.out.println(numeroCeros);
-		System.out.println(DateUtilitario.getHoraActual(DateUtilitario.getCurrentDate()));
+//		System.out.println(DateUtilitario.getHoraActual(DateUtilitario.getCurrentDate()));
         
 	}
 
