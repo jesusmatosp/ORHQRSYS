@@ -14,6 +14,7 @@ public class PersonaAsistenciaDTO implements Serializable{
 	private String estado;
 	private boolean result;
 	private String mensaje;
+	private String nombrePersona;
 	
 	public Long getIdAsistencia() {
 		return idAsistencia;
@@ -56,6 +57,12 @@ public class PersonaAsistenciaDTO implements Serializable{
 	}
 	public void setMensaje(String mensaje) {
 		this.mensaje = mensaje;
+	}
+	public String getNombrePersona() {
+		return nombrePersona;
+	}
+	public void setNombrePersona(String nombrePersona) {
+		this.nombrePersona = nombrePersona;
 	}
 	
 	

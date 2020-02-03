@@ -95,8 +95,9 @@ public class PersonaService {
 			Integer iDia = DateUtilitario.getDiaSemana(DateUtilitario.getCurrentDate());
 			String sDia = DiaType.get(iDia).getValue();
 			String sHora = DateUtilitario.getHoraActual(DateUtilitario.getCurrentDate());
-			List<EventoHorario> eventoHorario = eventoHorarioRepository.getEventoByDiaHora(asistencia.getIdEvento(), sDia, sHora);
-			if(eventoHorario.isEmpty()) throw new PersonaException("El Evento o Curso no se encuentra disponible en estos momentos para el registro de asistencia.");
+			// List<EventoHorario> eventoHorario = eventoHorarioRepository.getEventoByDiaHora(asistencia.getIdEvento(), sDia, sHora);
+			List<EventoHorario> eventoHorario = eventoHorarioRepository.getEventoByDiaHora(asistencia.getIdEvento(), sDia);
+			// if(eventoHorario.isEmpty()) throw new PersonaException("El Evento o Curso no se encuentra disponible en estos momentos para el registro de asistencia.");
 			
 			// Validar Evento existe:
 			List<Evento> evento = eventoRepository.findEventoByIdFechas(asistencia.getIdEvento(), DateUtilitario.getCurrentDate());
@@ -120,9 +121,21 @@ public class PersonaService {
 			asistRepository.save(pa);
 			pAsistencia.setResult(true);
 			pAsistencia.setEstado("OK");
-			
 			// Get Cantidad:
-			
+			String message = "";
+			Integer idPersona = Integer.parseInt(String.valueOf(asistencia.getIdPersona()));
+			Optional<Persona> oPersona = repository.findById(idPersona);
+			Persona persona = oPersona.get();
+			pAsistencia.setNombrePersona(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno());
+			// Evento:
+			Optional<Evento> oEvento = eventoRepository.findById(asistencia.getIdEvento());
+			Evento e = oEvento.get();
+			// Participantes:
+			if(personaAsistencia.size() == e.getCantidadParticipantes()) {
+				pAsistencia.setMensaje("Todos los partcipantes han sido registrados");
+			} else {
+				pAsistencia.setMensaje("Asistentes: " + personaAsistencia.size() + " de " + e.getCantidadParticipantes());
+			}
 			
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());

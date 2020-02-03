@@ -122,7 +122,7 @@ public class PersonaController {
 			response.setCodigo("100");
 			response.setCodigoHTTP(HttpStatus.OK.name());
 			response.setMessage("OK");
-			response.setData(true);
+			response.setData(resultado);
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());
 			response.setCodigo("005");
