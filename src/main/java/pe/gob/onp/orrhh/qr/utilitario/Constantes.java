@@ -41,7 +41,7 @@ public class Constantes {
 	
 	public static final String GMAIL_HOST = "smtp.gmail.com";
 	public static final String GMAIL_USERNAME = "mitsolution.laser@gmail.com";
-	public static final String GMAIL_PASSWORD = "M1ts0lut10n";
+	public static final String GMAIL_PASSWORD = "S@nd@Ch1n3s32018";
 	
 	public static final String PASSWORD_TEMPORAL_APP = "123456";
 }
