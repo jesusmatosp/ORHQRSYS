@@ -131,10 +131,11 @@ public class PersonaService {
 			Optional<Evento> oEvento = eventoRepository.findById(asistencia.getIdEvento());
 			Evento e = oEvento.get();
 			// Participantes:
-			if(personaAsistencia.size() == e.getCantidadParticipantes()) {
+			Long cantidadMarcacion =  asistRepository.getCountEvento(evtHora.getIdEventoHorario());
+			if(Integer.parseInt(String.valueOf(cantidadMarcacion)) == e.getCantidadParticipantes()) {
 				pAsistencia.setMensaje("Todos los partcipantes han sido registrados");
 			} else {
-				pAsistencia.setMensaje("Asistentes: " + personaAsistencia.size() + " de " + e.getCantidadParticipantes());
+				pAsistencia.setMensaje("Asistentes: " + cantidadMarcacion + " de " + e.getCantidadParticipantes());
 			}
 			
 		} catch (Exception e) {

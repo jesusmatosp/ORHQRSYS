@@ -78,6 +78,9 @@ public class Persona {
 	@Column( name = "ACTIVO" )
 	private String activo;
 	
+	@Column( name = "EDAD")
+	private String edad;
+	
 	public Integer getIdPersona() {
 		return idPersona;
 	}
@@ -185,5 +188,11 @@ public class Persona {
 	}
 	public void setActivo(String activo) {
 		this.activo = activo;
+	}
+	public String getEdad() {
+		return edad;
+	}
+	public void setEdad(String edad) {
+		this.edad = edad;
 	}
 }

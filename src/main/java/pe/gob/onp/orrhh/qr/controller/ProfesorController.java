@@ -4,6 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.thymeleaf.context.Context;
 
+import pe.gob.onp.orrhh.qr.core.unit.mail.EmailHtmlSender;
+import pe.gob.onp.orrhh.qr.core.unit.mail.EmailStatus;
 import pe.gob.onp.orrhh.qr.dto.ProfesorCriteriaSearchDTO;
 import pe.gob.onp.orrhh.qr.dto.ProfesorDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
@@ -29,6 +33,23 @@ public class ProfesorController {
 	@Autowired
 	private ProfesorService service;
 
+	@Autowired
+	private EmailHtmlSender emailHtmlSender;
+	
+	@GetMapping("/sendmail")
+	public String enviarCorreoPrueba() {
+		Context context = new Context();
+		context.setVariable("nombreColaborador", "JESUS MATOS PORTOCARRERO");
+		context.setVariable("nombreActividad", "PROGRAMACIÓN BASICA EN JAVA");
+		context.setVariable("logo", "logo");
+		context.setVariable("ic_background", "ic_background");
+		context.setVariable("ic_calendario", "ic_calendario");
+		context.setVariable("ic_reloj", "ic_reloj");
+		context.setVariable("ic_lugar", "ic_lugar");
+//		EmailStatus emailStatus = emailHtmlSender.send("jesus.matosp@gmail.com", "Title of email 2", "email/template-1", context, null);
+		return "Correo Enviado: ";
+	}
+	
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/create")
 	public @ResponseBody ResponseDataDTO create(@RequestBody ProfesorDTO profesorDTO) {

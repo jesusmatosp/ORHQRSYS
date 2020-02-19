@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.464100000000001"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="LOGO_ONP" class="java.lang.String"/>
+	<parameter name="LOGO_ONP" class="java.io.InputStream"/>
 	<parameter name="CODIGO_EVENTO" class="java.lang.String"/>
 	<parameter name="MES" class="java.lang.String"/>
 	<parameter name="FECHA_MARCACION" class="java.lang.String"/>

@@ -3,6 +3,10 @@ package pe.gob.onp.orrhh.qr.dto;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.poi.ss.formula.functions.EDate;
+
+import pe.gob.onp.orrhh.qr.utilitario.exception.PersonaException;
+
 public class PersonaDTO implements Serializable{
 
 	/**
@@ -15,6 +19,7 @@ public class PersonaDTO implements Serializable{
 	private String apellidoMaterno;
 	private String nombres;
 	private String sexo;
+	private String edad;
 	private String regimen;
 	private String puesto;
 	private String areaCorporativa;
@@ -145,4 +150,22 @@ public class PersonaDTO implements Serializable{
 		this.regimenOld = regimenOld;
 	}
 	
+	public void validarDatosPersona(int position) throws PersonaException {
+		if(dni == null || dni.equals("BLANK") || dni.isEmpty()) throw new PersonaException("El campo dni es obligatorio, registro: " + position);
+		if(apellidoPaterno == null || apellidoPaterno.equals("BLANK") || apellidoPaterno.isEmpty()) throw new PersonaException("El campo Apellido Paterno es obligatorio, registro: " + position);
+		if(apellidoMaterno == null || apellidoMaterno.equals("BLANK") || apellidoMaterno.isEmpty()) throw new PersonaException("El campo Apellido Materno es obligatorio, registro: " + position);
+		if(nombres == null || nombres.equals("BLANK") || nombres.isEmpty()) throw new PersonaException("El campo nombres es obligatorio, registro: " + position );
+		if(sexo == null || sexo.equals("BLANK") || sexo.isEmpty()) throw new PersonaException("El campo sexo es obligatorio, registro: " + position);
+		if(edad == null || edad.equals("BLANK") || edad.isEmpty()) throw new PersonaException("El campo edad es obligatorio, registro: " + position);
+		if(puesto == null || puesto.equals("BLANK") || puesto.isEmpty()) throw new PersonaException("El campo puesto es obligatorio, registro: " + position);
+		if(regimen == null || regimen.equals("BLANK") || regimen.isEmpty()) throw new PersonaException("El campo regimen es obligatorio, registro: " + position);
+		if(areaCorporativa == null || areaCorporativa.equals("BLANK") || areaCorporativa.isEmpty()) throw new PersonaException("El campo area operativa es obligatorio, registro: " + position);
+		if(correoCorporativo == null || correoCorporativo.equals("BLANK") || correoCorporativo.isEmpty()) throw new PersonaException("El campo correo corporativo obligatorio, registro: " + position);
+	}
+	public String getEdad() {
+		return edad;
+	}
+	public void setEdad(String edad) {
+		this.edad = edad;
+	}
 }

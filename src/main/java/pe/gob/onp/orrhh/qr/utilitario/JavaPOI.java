@@ -17,11 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pe.gob.onp.orrhh.qr.dto.PersonaDTO;
+import pe.gob.onp.orrhh.qr.utilitario.exception.PersonaException;
 
 public class JavaPOI {
 	private static final Logger LOG = LoggerFactory.getLogger(JavaPOI.class);
 	
-	public List<PersonaDTO> leerExcelFilePersona(File excelFile) {
+	public List<PersonaDTO> leerExcelFilePersona(File excelFile) throws PersonaException {
 		List<PersonaDTO> personas = null;
 		InputStream excelStream = null;
 		try {
@@ -31,6 +32,7 @@ public class JavaPOI {
 			XSSFRow hssfRow;
 			int rows = hssfSheet.getLastRowNum();
 			personas = new ArrayList<PersonaDTO>();
+			if(rows == 0 || rows == 1) throw new PersonaException("El archivo no puede estar vacío");
 			for(int r  = 1; r < rows+1; r++){
 				hssfRow = hssfSheet.getRow(r);
 				if(hssfRow == null){
@@ -39,17 +41,15 @@ public class JavaPOI {
 					PersonaDTO personaDTO = new PersonaDTO();
 					DataFormatter df = new DataFormatter();
 					String dniValue = df.formatCellValue(hssfRow.getCell(0));
-					
 					personaDTO.setDni(dniValue);
 					if(personaDTO.getDni().equalsIgnoreCase("BLANK") || personaDTO.getDni().isEmpty() || personaDTO.getDni().equals("")) break;
 					personaDTO.setApellidoPaterno(obtenerCelda(hssfRow, 1));
 					personaDTO.setApellidoMaterno(obtenerCelda(hssfRow, 2));
 					personaDTO.setNombres(obtenerCelda(hssfRow, 3));
 					personaDTO.setSexo(obtenerCelda(hssfRow, 4));
+					personaDTO.setEdad(obtenerCelda(hssfRow, 5));
 					personaDTO.setPuesto(obtenerCelda(hssfRow, 6));
 					personaDTO.setRegimen(obtenerCelda(hssfRow, 7));
-//					personaDTO.setFechaIngreso(obtenerCelda(hssfRow, 8) != null ?
-//							DateUtilitario.convertStringToDate(obtenerCelda(hssfRow, 8)) : null);
 					df = new DataFormatter();
 					String CellValue = df.formatCellValue(hssfRow.getCell(8));
 					personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "MM/dd/YY"));
@@ -57,9 +57,12 @@ public class JavaPOI {
 					personaDTO.setCorreoCorporativo(obtenerCelda(hssfRow, 10));
 					personaDTO.setCorreoPersonal(obtenerCelda(hssfRow, 11));
 					personaDTO.setFechaCarga(DateUtilitario.getCurrentDate());
+					personaDTO.validarDatosPersona(r);
 					personas.add(personaDTO);
 				}
 			}
+		} catch (PersonaException personaException) {
+			throw new PersonaException(personaException.getLocalizedMessage());
 		} catch (FileNotFoundException fileNotFoundException) {
 			LOG.error("The file not exists (No se encontró el fichero): " + fileNotFoundException);
         } catch (IOException ex) {

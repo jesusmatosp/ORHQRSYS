@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Order Confirmation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <style>
+    	body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 36px;
+        }
+       .rectngulo_blanco_1_
+        {
+            background : #FFFFFF;
+            background : rgba(255, 255, 255, 1);
+            position : absolute ;
+            left : 86px;
+            top : 75px;
+            width : 1029px;
+            height : 1043px;
+        }
+        .background_bienestar_2_
+        {
+            background-image : url('http://104.41.33.38/background_1.png');
+            background-repeat : no-repeat;
+            position : absolute ;
+            left : -3px;
+            top : 0px;
+            width : 1201px;
+            height : 1201px;
+        }
+        .logo_bienestar
+        {
+            width : 144px;
+            height : 144px;
+        }
+
+        .label_colaborador {
+            font-family : Myriad Pro regular;
+            font-size : 42px;
+            color : #FF712F;
+            color : rgb(255, 113, 47);
+            text-outline : #FF712F;
+            text-outline : rgb(255, 113, 47);
+        }
+        .text_generico {
+            font-family : Myriad Pro Regular;
+            font-size : 36px;
+            color : #000000;
+            color : rgb(0, 0, 0);
+        }
+        .text_generico_2 {
+            font-family : Myriad Pro Regular;
+            font-size : 24px;
+            color : #000000;
+            color : rgb(0, 0, 0);
+        }
+        .titulo_evento {
+            font-weight : bold;
+            font-size : 36px;
+            line-height : 70.94px;
+            letter-spacing : -0.5px;
+            color : #01A79D;
+            color : rgb(1, 167, 157);
+        }
+    </style>
+</head>
+<body>
+	<div class="background_bienestar_2_">
+		<div class="rectngulo_blanco_1_" style="margin-left: 110px; padding-top: 150px;">
+			<table th:background="|cid:${ic_background}|" style="width: 100%; border: 0; padding: 80px;">
+			<tr style="text-align: center; margin-top: 30px;">
+				<td><img th:src="|cid:${logo}|" style="text-align: center;"></td>
+				<td colspan="4"><span class="titulo_evento" th:text="${nombreActividad}"></span><br /></td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td colspan="6"><span class="label_colaborador" th:text="${nombreColaborador}" style="padding-top: 30px;"></span></td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td colspan="6">
+					<span class="text_generico">¡Te esperamos para iniciar la actividad!</span>
+					<br />
+				</td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td><img th:src="|cid:${ic_calendario}|"></td>
+				<td>
+					<span class="text_generico_2" >Inicio: </span>
+	                <span class="text_generico_2" th:text="${fechaInicio}"></span>
+	                
+	                <span class="text_generico_2" >Fin: </span>
+	                <span class="text_generico_2" th:text="${fechaFin}"></span>
+				</td>
+				<td><img th:src="|cid:${ic_reloj}|"></td>
+				<td>
+					<span class="text_generico_2" th:text="${horarios}" ></span>
+				</td>
+				<td><img th:src="|cid:${ic_lugar}|"></td>
+				<td><span class="text_generico_2" th:text="${sede}" > </span></td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px; height: 50px;">
+				<td colspan="6"><br /><br /><br /><br /><br /><br /><span class="text_generico_2">
+					Adjuntamos tu código QR para el registro de tu asistencia:</span>
+					<br /><br /><br /><br /><br />
+				</td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td colspan="6">
+					<img th:src="@{'data:image/png;base64,'+${qr}}">
+				</td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td colspan="6"><span class="text_generico_2">Este código es <strong>persona e intransferible</strong></span></td>
+			</tr>
+			<tr style="text-align: center; margin-top: 30px;">
+				<td colspan="6"><span class="text_generico_2">¡Agradecemos tu participación!</strong></span></td>
+			</tr>
+		</table>
+		</div>
+	</div>
+</body>
+</html>

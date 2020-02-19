@@ -1,10 +1,14 @@
 package pe.gob.onp.orrhh.qr.service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +17,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -30,6 +36,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import com.lowagie.text.pdf.AcroFields.Item;
 
@@ -38,13 +45,17 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import pe.gob.onp.orrhh.qr.bean.AsistenteSedeBen;
 import pe.gob.onp.orrhh.qr.bean.DetailReporteResumenBean;
 import pe.gob.onp.orrhh.qr.bean.PersonaEventoAsistenteBean;
 import pe.gob.onp.orrhh.qr.bean.ReporteDetalladoBean;
 import pe.gob.onp.orrhh.qr.bean.ReporteResumenBean;
+import pe.gob.onp.orrhh.qr.core.unit.mail.EmailHtmlSender;
+import pe.gob.onp.orrhh.qr.core.unit.mail.EmailStatus;
 import pe.gob.onp.orrhh.qr.dto.AsistenciaDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoDTO;
 import pe.gob.onp.orrhh.qr.dto.EventoHorarioDTO;
@@ -125,6 +136,9 @@ public class EventoService {
 	
 	@Autowired
 	private PersonaEventoAsistenciaRepository personaEventoAsistenciaRepository;
+	
+	@Autowired
+	private EmailHtmlSender emailHtmlSender;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EventoService.class); 
 	
@@ -412,7 +426,14 @@ public class EventoService {
 		Optional<Proceso> optProceso = procesoRepository.findById(idProceso);
 		if(optProceso == null) throw new EventoException(messageSource.getMessage(Constantes.MESSAGE_EXCEPTION_PROCESO_NOT_FOUND, null, Locale.US));
 		Proceso prc = optProceso.get();
-				
+		
+		Parametro parametro = parametroRepository.findParametroByCodParametro(evt.getSede());
+		String template = "";
+		if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+			template = "template-1";
+		} else { // capacitacion
+			template = "template-2";
+		}
 		List<Persona> lstPersonas = prc.getPersonas();
 		for(Persona persona: lstPersonas) {
 			PersonaEventoDTO evtPer = new PersonaEventoDTO();
@@ -426,12 +447,42 @@ public class EventoService {
 			personaRepository.save(persona);
 
 			// Notificar:
-			String emailBody = MailTemplateUtil.templateQRCode(persona, evt);
-			List<String> cc = new ArrayList<String>();
-			cc.add(persona.getCorreoPersonal());
-			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
-					true, cc, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, qrCode, persona.getDni() + UUID.randomUUID() ,
-					"png");
+			Context context = new Context();
+			context.setVariable("nombreColaborador", persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno());
+			context.setVariable("nombreActividad", evt.getNombreEvento());
+			context.setVariable("fechaInicio", DateUtilitario.convertDatetostring(evt.getFechaInicio()));
+			context.setVariable("fechaFin", DateUtilitario.convertDatetostring(evt.getFechaCierre()));
+			context.setVariable("sede", parametro.getNombreParametro());
+			
+			List<EventoHorario> horarios = evt.getHorario();
+			String strHorario = "";
+			for(EventoHorario item: horarios) {
+				strHorario += item.getDia() + " De " + item.getHoraInicio() + " a " + item.getHoraFin() + "  <br />";
+			}
+			context.setVariable("horarios", strHorario);
+			context.setVariable("logo", "logo");
+			context.setVariable("ic_background", "ic_background");
+			context.setVariable("ic_calendario", "ic_calendario");
+			context.setVariable("ic_reloj", "ic_reloj");
+			context.setVariable("ic_lugar", "ic_lugar");
+			context.setVariable("qr", Base64.getEncoder().encodeToString(qrCode));
+			System.out.println("code: " + Base64.getEncoder().encodeToString(qrCode));
+			EmailStatus emailStatus = emailHtmlSender.send(persona.getCorreoCorporativo(),
+						"ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(),
+						"email/" + template, context, qrCode, evt.getTipoEvento());	
+			LOG.info("ONP - Envio de QR: [" + emailStatus.getTo() + " " + emailStatus.getStatus() + "]");
+//			 ExecutorService emailExecutor = Executors.newCachedThreadPool();
+//		        // from you getSalesUserData() method
+//		        emailExecutor.execute(new Runnable() {
+//		            @Override
+//		            public void run() {
+//		                try {
+//		                	         
+//		                } catch (Exception e) {
+//		                    LOG.error("failed", e);
+//		                }
+//		            }
+//		        });
 		}
 	}
 	
@@ -443,12 +494,39 @@ public class EventoService {
 			Evento evt = optEvento.get();
 			Optional<Persona> oPersona = personaRepository.findById(Integer.parseInt(String.valueOf(personaEvento.getId().getIdPersona())));
 			Persona persona = oPersona.get();
+			
+			Parametro parametro = parametroRepository.findParametroByCodParametro(evt.getSede());
+			String template = "";
+			if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+				template = "template-1";
+			} else { // capacitacion
+				template = "template-2";
+			}
+
 			// Notificar:
-			String emailBody = MailTemplateUtil.templateQRCode(persona, evt);
-			mailService.sendEmailGmailAccount(persona.getCorreoCorporativo(), 
-					false, null, emailBody, "ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(), true, persona.getCodQR(), 
-								persona.getDni() + UUID.randomUUID() ,
-								"png");
+			Context context = new Context();
+			context.setVariable("nombreColaborador", persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno());
+			context.setVariable("nombreActividad", evt.getNombreEvento());
+			context.setVariable("fechaInicio", DateUtilitario.convertDatetostring(evt.getFechaInicio()));
+			context.setVariable("fechaFin", DateUtilitario.convertDatetostring(evt.getFechaCierre()));
+			context.setVariable("sede", parametro.getNombreParametro());
+			
+			List<EventoHorario> horarios = evt.getHorario();
+			String strHorario = "";
+			for(EventoHorario item: horarios) {
+				strHorario += item.getDia() + " De " + item.getHoraInicio() + " a " + item.getHoraFin() + "  <br />";
+			}
+			context.setVariable("horarios", strHorario);
+			context.setVariable("logo", "logo");
+			context.setVariable("ic_background", "ic_background");
+			context.setVariable("ic_calendario", "ic_calendario");
+			context.setVariable("ic_reloj", "ic_reloj");
+			context.setVariable("ic_lugar", "ic_lugar");
+			context.setVariable("qr", Base64.getEncoder().encodeToString(persona.getCodQR()));
+			EmailStatus emailStatus = emailHtmlSender.send(persona.getCorreoCorporativo(),
+						"ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(),
+						"email/" + template, context, persona.getCodQR(), evt.getTipoEvento());	
+			LOG.info("ONP - Envio de QR: [" + emailStatus.getTo() + " " + emailStatus.getStatus() + "]");
 		}
 		return result;
 	}
@@ -648,8 +726,9 @@ public class EventoService {
 	
 	// Reportes:
 	public JasperPrint generarReporteAsistencia(Long idEvento) throws JRException, IOException {
-		 String path = resourceLoader.getResource("classpath:rpte_asistencia_curso.jrxml").getURI().getPath();
-		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		 // String path = resourceLoader.getResource("classpath:rpte_asistencia_curso.jrxml").getURI().getPath();
+		 String path = getClass().getResource("classpath:rpte_asistencia_curso.jrxml").getPath();
+		 JasperReport jasperReport = JasperCompileManager.compileReport(new File("").getAbsolutePath()+"/src/pe/gob/onp/orrhh/qr/reportes/rpte_asistencia_curso.jrxml");
 		 // Parameters for report
 		 List<PersonAsistencia> list = asistenciaRepository.getAsistenciaByIdEvento(idEvento);
 		 Optional<Evento> opt = repository.findById(idEvento);
@@ -688,10 +767,9 @@ public class EventoService {
 	}
 	
 	public JasperPrint generarReporteAsistenciaFecha(FilterReporteDTO filter) throws JRException, IOException, EventoException, Exception {
-		String path = resourceLoader.getResource("classpath:reporteAsistenciaPersona.jrxml").getURI().getPath();
-		String imagen = resourceLoader.getResource("classpath:ic_logo_onp.png").getURI().getPath();
-		
-		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		InputStream imagen = Thread.currentThread().getContextClassLoader().getResourceAsStream("ic_logo_onp.png");
+		JasperReport jasperReport = JasperCompileManager.compileReport(Thread.currentThread().getContextClassLoader().getResourceAsStream("reporteAsistenciaPersona.jrxml"));
+		System.out.println("jasper " + imagen);
 		 // Parameters for report
 		 Map<String, Object> parameters = new HashMap<String, Object>();
 		 parameters.put("LOGO_ONP", imagen);
@@ -732,11 +810,10 @@ public class EventoService {
 	}
 	
 	public JasperPrint generarReporteAsistenciaSede(FilterReporteDTO filter) throws JRException, IOException, EventoException {
-		String path = resourceLoader.getResource("classpath:reporteAsistenciaSede.jrxml").getURI().getPath();
-		String imagen = resourceLoader.getResource("classpath:ic_logo_onp.png").getURI().getPath();
-		 JasperReport jasperReport = JasperCompileManager.compileReport(path);
+		// String path = resourceLoader.getResource("classpath:reporteAsistenciaSede.jrxml").getURI().getPath();
+		JasperReport jasperReport = JasperCompileManager.compileReport(Thread.currentThread().getContextClassLoader().getResourceAsStream("reporteAsistenciaSede.jrxml"));
 		 // Parameters for report
-		 
+		InputStream imagen = Thread.currentThread().getContextClassLoader().getResourceAsStream("ic_logo_onp.png");
 		 // Get Sede y Tipo Evento:
 		 Parametro p1 = parametroRepository.findParametroByCodParametro(filter.getTipoEvento());
 		 Parametro p2 = parametroRepository.findParametroByCodParametro(filter.getSede());

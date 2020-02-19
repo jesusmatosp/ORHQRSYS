@@ -171,8 +171,7 @@ public class EventoController {
 		}
 		return response;
 	}
-	
-	
+		
 	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
 	@PostMapping("/persona")
 	public @ResponseBody ResponseDataDTO asociarEvento(@RequestBody PersonaEventoDTO personaEventoDTO) {

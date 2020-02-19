@@ -21,5 +21,8 @@ public interface PersonaAsistenciaRepository extends CrudRepository<PersonAsiste
 	@Query("SELECT a FROM PersonAsistencia a WHERE a.idEvento =:idEvento ")
 	public List<PersonAsistencia> getAsistenciaByIdEvento(@Param("idEvento") Long idEvento);
 	
+	@Query("SELECT count(*) FROM PersonAsistencia a WHERE a.idEventoHorario = :idEventoHorario ")
+	public Long getCountEvento(@Param("idEventoHorario") Long idEventoHorario);
+	
 	
 }

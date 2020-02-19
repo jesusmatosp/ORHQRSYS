@@ -79,12 +79,21 @@ public class PersonaController {
 				oPersona.setActivo(Constantes.ESTADO_ACTIVO_VALUE);
 				list.add(oPersona);
 			}
+			System.out.println("Personas: " + list.size());
+			LOG.info("Personas: " + list.size());
+			
+			if(list.size() == 0) throw new PersonaException("El archivo no puede estar vacío.");
 			proceso.setPersonas(list);
 			proceso = procesoService.procesarCarga(proceso);
 			response.setCodigo("100");
 			response.setCodigoHTTP(HttpStatus.OK.name());
 			response.setMessage("" + proceso.getIdProceso());
 			response.setData(personas);
+		} catch (PersonaException personaException) {
+			LOG.error(personaException.getLocalizedMessage(), personaException.getCause());
+			response.setCodigo("004");
+			response.setCodigoHTTP(HttpStatus.NOT_FOUND.name());
+			response.setMessage(personaException.getLocalizedMessage());
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e.getCause());
 			response.setCodigo("005");
@@ -94,7 +103,7 @@ public class PersonaController {
 		return response;
 	}
 
-	private List<PersonaDTO> uploadedFiles(List<MultipartFile> files, String filePath) throws IOException {
+	private List<PersonaDTO> uploadedFiles(List<MultipartFile> files, String filePath) throws IOException, PersonaException {
 		List<PersonaDTO> personas = new ArrayList<PersonaDTO>();
 		for (MultipartFile file : files) {
 			if (file.isEmpty()) {
@@ -107,7 +116,6 @@ public class PersonaController {
 			// Iniciar procesamiento de lectura de excel
 			File fileProcess = ONPUtilitarios.convert(file);
 			JavaPOI javaPoiUtils = new JavaPOI();
-			// javaPoiUtils.readExcelFile(fileProcess);
 			personas = javaPoiUtils.leerExcelFilePersona(fileProcess);
 		}
 		return personas;

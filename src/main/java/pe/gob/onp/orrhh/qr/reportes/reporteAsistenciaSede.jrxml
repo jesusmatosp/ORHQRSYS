@@ -3,7 +3,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="38"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="LOGO_ONP" class="java.lang.String"/>
+	<parameter name="LOGO_ONP" class="java.io.InputStream"/>
 	<parameter name="TIPO_EVENTO" class="java.lang.String"/>
 	<parameter name="SEDE" class="java.lang.String"/>
 	<parameter name="DESDE" class="java.lang.String"/>
@@ -243,13 +243,6 @@
 	</columnFooter>
 	<pageFooter>
 		<band height="27" splitType="Stretch">
-			<staticText>
-				<reportElement x="355" y="0" width="100" height="20"/>
-				<textElement verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Total Participantes:]]></text>
-			</staticText>
 			<textField>
 				<reportElement x="455" y="0" width="100" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -270,6 +263,13 @@
 					<font size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Cantidad Actividades:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="355" y="0" width="100" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Participantes:]]></text>
 			</staticText>
 		</band>
 	</pageFooter>

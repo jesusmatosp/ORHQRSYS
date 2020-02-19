@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 public enum DiaType {
-	LUNES(2 , "L"),
-	MARTES(3, "M"),
-	MIERCOLES(4, "MI"),
-	JUEVES(5, "J"),
-	VIERNES(6, "V"),
-	SABADO(7, "S"),
-	DOMINGO(1, "D");
+	LUNES(2 , "LU"),
+	MARTES(3, "MA"),
+	MIERCOLES(4, "MIE"),
+	JUEVES(5, "JU"),
+	VIERNES(6, "VI"),
+	SABADO(7, "SAB"),
+	DOMINGO(1, "DOM");
 	
 	/** La key. */
 	private Integer key;
