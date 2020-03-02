@@ -1,5 +1,6 @@
 package pe.gob.onp.orrhh.qr.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,6 +76,11 @@ import pe.gob.onp.orrhh.qr.model.PersonaEvento;
 import pe.gob.onp.orrhh.qr.model.PersonaEventoPK;
 import pe.gob.onp.orrhh.qr.model.Proceso;
 import pe.gob.onp.orrhh.qr.model.Profesor;
+import pe.gob.onp.orrhh.qr.notifica.ws.BCabeceraCorreoBean;
+import pe.gob.onp.orrhh.qr.notifica.ws.BCorreoBean;
+import pe.gob.onp.orrhh.qr.notifica.ws.BCorreoResponse;
+import pe.gob.onp.orrhh.qr.notifica.ws.BCorreoServidor;
+import pe.gob.onp.orrhh.qr.notifica.ws.BImagenCorreoBean;
 import pe.gob.onp.orrhh.qr.repository.AsistenteSedeRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoAsistenciaRepository;
 import pe.gob.onp.orrhh.qr.repository.EventoHorarioRepository;
@@ -89,6 +96,7 @@ import pe.gob.onp.orrhh.qr.utilitario.Constantes;
 import pe.gob.onp.orrhh.qr.utilitario.DateUtilitario;
 import pe.gob.onp.orrhh.qr.utilitario.JasperDataSource;
 import pe.gob.onp.orrhh.qr.utilitario.MailTemplateUtil;
+import pe.gob.onp.orrhh.qr.utilitario.Main;
 import pe.gob.onp.orrhh.qr.utilitario.QRCodeGenerator;
 import pe.gob.onp.orrhh.qr.utilitario.exception.EventoException;
 
@@ -139,6 +147,10 @@ public class EventoService {
 	
 	@Autowired
 	private EmailHtmlSender emailHtmlSender;
+	
+	public static Properties prop;
+	public static InputStream input;		
+	private static Logger logger = LoggerFactory.getLogger(Main.class);
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EventoService.class); 
 	
@@ -527,8 +539,231 @@ public class EventoService {
 						"ORRHH - ONP / Constancia de Matricula " + evt.getNombreEvento(),
 						"email/" + template, context, persona.getCodQR(), evt.getTipoEvento());	
 			LOG.info("ONP - Envio de QR: [" + emailStatus.getTo() + " " + emailStatus.getStatus() + "]");
+			
+			// Notificar por ONP
+			try {
+				prop = new Properties();
+				input = null;
+				input = getClass().getClassLoader().getResourceAsStream("config.properties");
+				prop.load(input);	
+				
+				String correosDestinatarioONP = new String();
+				BCorreoBean paramCorreoBean = new BCorreoBean();
+				paramCorreoBean.setAsunto("ONP M\u00f3vil - Comunicaci\u00f3n recibida correctamente");
+				BCorreoServidor bCorreoServidor=new BCorreoServidor();
+				bCorreoServidor.setServidorCorreo(prop.getProperty("HOST_SERVIDOR_CORREO"));
+				bCorreoServidor.setPuertoServidor(prop.getProperty("PUERTO_SERVIDOR_CORREO"));
+				bCorreoServidor.setSmtpAuth(false);
+
+				byte[] byteLogo = null;
+				byte[] background = null;
+				byte[] ic_calendario = null;
+				byte[] ic_reloj = null;
+				byte[] ic_lugar = null;
+				
+		
+				BCabeceraCorreoBean cabeceraCorreoBean = new BCabeceraCorreoBean();
+				cabeceraCorreoBean.setCorreoRemitente(prop.getProperty("correoRemitente"));
+					
+				String[] correosDestinatarios = new String[2];				
+				correosDestinatarios[0] = persona.getCorreoCorporativo();
+				correosDestinatarios[1] = persona.getCorreoPersonal();
+				cabeceraCorreoBean.setCorreoDestino(correosDestinatarios);
+			
+				List<BImagenCorreoBean> lstBCorreoImagen = new ArrayList<BImagenCorreoBean>();
+				
+				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[5];
+				String imgLogo ="";
+				String imgBackground = "";
+				String imgCalendario = "";
+				String imgReloj = "";
+				String imgLugar = "";
+				
+				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+					imgLogo = "img/logo_bienestar.png";
+					imgBackground = "img/background_bienestar_2_.png";
+					imgCalendario = "img/icono_calendario.png";
+					imgReloj = "img/icono_reloj.png";
+					imgLugar = "img/icono_lugar.png";
+				} else {
+					imgLogo = "img/logo_capacitacion.png";
+					imgBackground = "img/background_1.png";
+					imgCalendario = "img/calendario_icono.png";
+					imgReloj = "img/reloj_icono.png";
+					imgLugar = "img/lugar_icono.png";
+				}
+				byteLogo=recuperarBytesDesdeArchivo(imgLogo);
+				background=recuperarBytesDesdeArchivo(imgBackground);
+				ic_calendario = recuperarBytesDesdeArchivo(imgCalendario);
+				ic_reloj = recuperarBytesDesdeArchivo(imgReloj);
+				ic_lugar = recuperarBytesDesdeArchivo(imgLugar);
+				
+				BImagenCorreoBean bCorreoImagen = null;
+		
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img1");
+				bCorreoImagen.setArchivoAdjunto(byteLogo);
+				lstImagenes[0] = bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img2");
+				bCorreoImagen.setArchivoAdjunto(background);
+				lstImagenes[1]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img3");
+				bCorreoImagen.setArchivoAdjunto(ic_calendario);
+				lstImagenes[2]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img4");
+				bCorreoImagen.setArchivoAdjunto(ic_reloj);
+				lstImagenes[3]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img5");
+				bCorreoImagen.setArchivoAdjunto(ic_lugar);
+				lstImagenes[4]=bCorreoImagen;
+				
+				paramCorreoBean.setImagenesAdjuntas(lstImagenes);
+				String cuerpoCorreo = "";
+				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+					cuerpoCorreo = obtenerCuerpoMensajeUsuario_Bienestar(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno(), 
+							evt.getNombreEvento(), 
+							DateUtilitario.convertDatetostring(evt.getFechaInicio()), 
+							DateUtilitario.convertDatetostring(evt.getFechaCierre()), 
+							strHorario, 
+							parametro.getNombreParametro(),
+							Base64.getEncoder().encodeToString(persona.getCodQR()));
+				} else {
+					cuerpoCorreo = obtenerCuerpoMensajeUsuario_Capacitacion(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno(), 
+							evt.getNombreEvento(), 
+							DateUtilitario.convertDatetostring(evt.getFechaInicio()), 
+							DateUtilitario.convertDatetostring(evt.getFechaCierre()), 
+							strHorario, 
+							parametro.getNombreParametro(),
+							Base64.getEncoder().encodeToString(persona.getCodQR()));
+				}
+				paramCorreoBean.setMensaje(cuerpoCorreo);
+				paramCorreoBean.setCabeceraCorreoBean(cabeceraCorreoBean);				
+				pe.gob.onp.orrhh.qr.notifica.ws.WSProveedorCorreoDelegateProxy proxyEnvioCorreo =
+						new pe.gob.onp.orrhh.qr.notifica.ws.WSProveedorCorreoDelegateProxy();
+				proxyEnvioCorreo.setEndpoint(prop.getProperty("WSenvioCorreo"));
+				proxyEnvioCorreo.enviarCorreoFormatoHTML(bCorreoServidor, paramCorreoBean);
+				logger.info("Correo Enviado por Servicio ONP MAIL");
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error(e.getLocalizedMessage(), e.getCause());
+			}
+			
 		}
 		return result;
+	}
+	
+	private String obtenerCuerpoMensajeUsuario_Bienestar(String nombreColaborador, String nombreActividad, String fechaInicio, String fechaFin,
+			String horarios, String sede, String strQr) {
+		StringBuilder htmlText = new StringBuilder(); 	
+		htmlText.append("<div style='background-image: url('cid:img2');background-repeat: no-repeat;position: absolute;left: -3px;top: 0px;width: 1080px;height: 1080px;'>");
+		htmlText.append("<div style='background: #FFFFFF; background: rgba(255, 255, 255, 1);position: absolute ;width: 860px;height: 860px; margin-left: 110px; padding-top: 150px;'>");
+		htmlText.append("<table background='cid:img2' style='width: 100%; border: 0; padding: 80px;'>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><img src='cid:img1' style='text-align: center;'></td>");
+		htmlText.append("</tr> <tr style='text-align: center; padding-top: 30px;'>");
+		htmlText.append("<td colspan='6'><h1>Estimada/o:</h1></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><span style='font-family: Myriad Pro Regular;font-size: 42px;color : #3694CE;color: rgb(54, 148, 206);text-outline: #3694CE;text-outline: rgb(54, 148, 206);padding-top: 30px;'>" + nombreColaborador + "</span></td>");
+		htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><br /><br /><br />");
+		htmlText.append("<span style='color : #000000;color: rgb(0, 0, 0);'>¡Te esperamos para iniciar la actividad!</span>");
+		htmlText.append("<br /><br /><br /></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'>");
+		htmlText.append("<span style='font-size: 36px;color: #00B82F;color: rgb(0, 184, 47);'>" + nombreActividad + "</span>");
+		htmlText.append("<br /><br /><br /><br /></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td><img src='cid:img3'></td><td>");
+		htmlText.append("<span style='color: #000000; color: rgb(0, 0, 0);' >Inicio: </span>");
+	    htmlText.append("<span style='color: #000000; color: rgb(0, 0, 0);'>" + fechaInicio + "</span>");
+	    htmlText.append("<span style='color: #000000; color: rgb(0, 0, 0);' >Fin: </span>");
+	    htmlText.append("<span style='color: #000000; color: rgb(0, 0, 0);'>" + fechaFin + "</span></td>");
+	    htmlText.append("<td><img src='cid:img4'></td><td>");
+	    htmlText.append("<span style='color: #000000; color: rgb(0, 0, 0);' >" + horarios + "</span></td>");
+	    htmlText.append("<td><img src='cid:img5'></td>");
+	    htmlText.append("<td><span style='color: #000000; color: rgb(0, 0, 0);' >" + sede +"</span></td></tr>");
+	    htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+	    htmlText.append("<td colspan='6'><span style='color: #000000; color: rgb(0, 0, 0);'><br /><br /><br /><br /><br /><br />");
+	    htmlText.append("Adjuntamos tu código QR para el registro de tu asistencia:</span>");
+	    htmlText.append("<br /><br /></td></tr>");
+	    htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+	    htmlText.append("<td colspan='6'><img src='data:image/png;base64,'" + strQr + "'></td>");
+	    htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+	    htmlText.append("<td colspan='6'><span style='color: #000000; color: rgb(0, 0, 0);'>Este código es <strong>persona e intransferible</strong></span></td>");
+	    htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+	    htmlText.append("<td colspan='6'><span style='color: #000000; color: rgb(0, 0, 0);'>¡Agradecemos tu participación!</strong></span></td>");
+	    htmlText.append("</tr>");
+	    htmlText.append("</table></div></div>");
+		return htmlText.toString();
+	}
+	
+	private String obtenerCuerpoMensajeUsuario_Capacitacion(String nombreColaborador, String nombreActividad, String fechaInicio, String fechaFin,
+			String horarios, String sede, String strQr) {
+		StringBuilder htmlText = new StringBuilder();
+		htmlText.append("<div style='background-image : url('cid:img2');background-repeat: no-repeat;position: absolute ;left: -3px;top: 0px;width: 1201px;height: 1201px;'>");
+		htmlText.append("<div style='background: #FFFFFF;background: rgba(255, 255, 255, 1);position: absolute ;left: 86px;top: 75px;width: 1029px;height: 1043px;margin-left: 110px; padding-top: 150px;'>");
+		htmlText.append("<table background='cid:img2' style='width: 100%; border: 0; padding: 80px;'>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td><img src='cid:img1' style='text-align: center;'></td>");
+		htmlText.append("<td colspan='4'><span style='font-weight : bold; font-size : 36px; line-height : 70.94px; letter-spacing : -0.5px; color : #01A79D;'>"+nombreActividad+"</span><br /></td>");
+		htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><span style='font-family : Myriad Pro regular; font-size : 42px; color : #FF712F; text-outline : #FF712F;padding-top: 30px;'>"+nombreColaborador+"</span></td>");
+		htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><span style='font-family : Myriad Pro Regular; font-size : 36px; color : #000000;'>¡Te esperamos para iniciar la actividad!</span>");
+		htmlText.append("<br /></td></tr><tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td><img src='cid:img3'></td><td>");
+		htmlText.append("<span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;' >Inicio: </span>");
+		htmlText.append("<span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>"+fechaInicio+"</span>");
+		htmlText.append("<span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;' >Fin: </span>");
+		htmlText.append("<span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>" + fechaFin +"</span></td>");
+		htmlText.append("<td><img src='cid:img4'></td><td>");
+		htmlText.append("<span class='text_generico_2'>" + horarios + "</span></td>");
+		htmlText.append("<td><img src='cid:img5'></td>");
+		htmlText.append("<td><span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>" + sede + "</span></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px; height: 50px;'>");
+		htmlText.append("<td colspan='6'><br /><br /><br /><br /><br /><br /><span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>");
+		htmlText.append("Adjuntamos tu código QR para el registro de tu asistencia:</span>");
+		htmlText.append("<br /><br /><br /><br /><br /></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><img src='data:image/png;base64," + strQr + "'></td></tr>");
+		htmlText.append("<tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>Este código es <strong>persona e intransferible</strong></span></td>");
+		htmlText.append("</tr><tr style='text-align: center; margin-top: 30px;'>");
+		htmlText.append("<td colspan='6'><span style='font-family : Myriad Pro Regular; font-size : 24px; color : #000000;'>¡Agradecemos tu participación!</strong></span></td>");
+		htmlText.append("</tr></table></div></div>");
+		return htmlText.toString();
+	}
+	private static byte[] recuperarBytesDesdeArchivo(String rutaPaquete) throws Exception{
+		InputStream inputStream=null;
+		ByteArrayOutputStream buffer=null;
+		byte[] archivoBytes=null;
+		try{
+			inputStream = EventoService.class.getClassLoader().getResourceAsStream(rutaPaquete);
+			buffer = new ByteArrayOutputStream();
+			int nRead;
+			byte[] data1 = new byte[16384];
+			while ((nRead = inputStream.read(data1, 0, data1.length)) != -1) {
+				buffer.write(data1, 0, nRead);
+			}
+			buffer.flush();
+			archivoBytes=buffer.toByteArray();
+		}catch(Exception excepcion){
+			excepcion.printStackTrace();
+			
+			throw excepcion;
+		}finally{
+			buffer.close();
+			inputStream.close();
+		}
+		return archivoBytes;
 	}
 	
 	public void guardarPersonaEvento(PersonaEventoDTO personaEventoDTO) throws EventoException {
