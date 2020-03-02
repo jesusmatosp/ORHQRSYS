@@ -495,6 +495,122 @@ public class EventoService {
 //		                }
 //		            }
 //		        });
+			
+			// Notificar Servicio ONP
+			try {
+				prop = new Properties();
+				input = null;
+				input = getClass().getClassLoader().getResourceAsStream("config.properties");
+				prop.load(input);	
+				
+				String correosDestinatarioONP = new String();
+				BCorreoBean paramCorreoBean = new BCorreoBean();
+				paramCorreoBean.setAsunto("ONP M\u00f3vil - Comunicaci\u00f3n recibida correctamente");
+				BCorreoServidor bCorreoServidor=new BCorreoServidor();
+				bCorreoServidor.setServidorCorreo(prop.getProperty("HOST_SERVIDOR_CORREO"));
+				bCorreoServidor.setPuertoServidor(prop.getProperty("PUERTO_SERVIDOR_CORREO"));
+				bCorreoServidor.setSmtpAuth(false);
+
+				byte[] byteLogo = null;
+				byte[] background = null;
+				byte[] ic_calendario = null;
+				byte[] ic_reloj = null;
+				byte[] ic_lugar = null;
+				
+		
+				BCabeceraCorreoBean cabeceraCorreoBean = new BCabeceraCorreoBean();
+				cabeceraCorreoBean.setCorreoRemitente(prop.getProperty("correoRemitente"));
+					
+				String[] correosDestinatarios = new String[2];				
+				correosDestinatarios[0] = persona.getCorreoCorporativo();
+				correosDestinatarios[1] = persona.getCorreoPersonal();
+				cabeceraCorreoBean.setCorreoDestino(correosDestinatarios);
+			
+				List<BImagenCorreoBean> lstBCorreoImagen = new ArrayList<BImagenCorreoBean>();
+				
+				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[5];
+				String imgLogo ="";
+				String imgBackground = "";
+				String imgCalendario = "";
+				String imgReloj = "";
+				String imgLugar = "";
+				
+				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+					imgLogo = "img/logo_bienestar.png";
+					imgBackground = "img/background_bienestar_2_.png";
+					imgCalendario = "img/icono_calendario.png";
+					imgReloj = "img/icono_reloj.png";
+					imgLugar = "img/icono_lugar.png";
+				} else {
+					imgLogo = "img/logo_capacitacion.png";
+					imgBackground = "img/background_1.png";
+					imgCalendario = "img/calendario_icono.png";
+					imgReloj = "img/reloj_icono.png";
+					imgLugar = "img/lugar_icono.png";
+				}
+				byteLogo=recuperarBytesDesdeArchivo(imgLogo);
+				background=recuperarBytesDesdeArchivo(imgBackground);
+				ic_calendario = recuperarBytesDesdeArchivo(imgCalendario);
+				ic_reloj = recuperarBytesDesdeArchivo(imgReloj);
+				ic_lugar = recuperarBytesDesdeArchivo(imgLugar);
+				
+				BImagenCorreoBean bCorreoImagen = null;
+		
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img1");
+				bCorreoImagen.setArchivoAdjunto(byteLogo);
+				lstImagenes[0] = bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img2");
+				bCorreoImagen.setArchivoAdjunto(background);
+				lstImagenes[1]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img3");
+				bCorreoImagen.setArchivoAdjunto(ic_calendario);
+				lstImagenes[2]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img4");
+				bCorreoImagen.setArchivoAdjunto(ic_reloj);
+				lstImagenes[3]=bCorreoImagen;
+				
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("img5");
+				bCorreoImagen.setArchivoAdjunto(ic_lugar);
+				lstImagenes[4]=bCorreoImagen;
+				
+				paramCorreoBean.setImagenesAdjuntas(lstImagenes);
+				String cuerpoCorreo = "";
+				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
+					cuerpoCorreo = obtenerCuerpoMensajeUsuario_Bienestar(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno(), 
+							evt.getNombreEvento(), 
+							DateUtilitario.convertDatetostring(evt.getFechaInicio()), 
+							DateUtilitario.convertDatetostring(evt.getFechaCierre()), 
+							strHorario, 
+							parametro.getNombreParametro(),
+							Base64.getEncoder().encodeToString(persona.getCodQR()));
+				} else {
+					cuerpoCorreo = obtenerCuerpoMensajeUsuario_Capacitacion(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno(), 
+							evt.getNombreEvento(), 
+							DateUtilitario.convertDatetostring(evt.getFechaInicio()), 
+							DateUtilitario.convertDatetostring(evt.getFechaCierre()), 
+							strHorario, 
+							parametro.getNombreParametro(),
+							Base64.getEncoder().encodeToString(persona.getCodQR()));
+				}
+				paramCorreoBean.setMensaje(cuerpoCorreo);
+				paramCorreoBean.setCabeceraCorreoBean(cabeceraCorreoBean);				
+				pe.gob.onp.orrhh.qr.notifica.ws.WSProveedorCorreoDelegateProxy proxyEnvioCorreo =
+						new pe.gob.onp.orrhh.qr.notifica.ws.WSProveedorCorreoDelegateProxy();
+				proxyEnvioCorreo.setEndpoint(prop.getProperty("WSenvioCorreo"));
+				proxyEnvioCorreo.enviarCorreoFormatoHTML(bCorreoServidor, paramCorreoBean);
+				logger.info("Correo Enviado por Servicio ONP MAIL");
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error(e.getLocalizedMessage(), e.getCause());
+			}
 		}
 	}
 	
