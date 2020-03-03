@@ -31,6 +31,7 @@ import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.jfree.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -528,7 +529,7 @@ public class EventoService {
 			
 				List<BImagenCorreoBean> lstBCorreoImagen = new ArrayList<BImagenCorreoBean>();
 				
-				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[5];
+				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[6];
 				String imgLogo ="";
 				String imgBackground = "";
 				String imgCalendario = "";
@@ -536,17 +537,17 @@ public class EventoService {
 				String imgLugar = "";
 				
 				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
-					imgLogo = "img/logo_bienestar.png";
-					imgBackground = "img/background_bienestar_2_.png";
-					imgCalendario = "img/icono_calendario.png";
-					imgReloj = "img/icono_reloj.png";
-					imgLugar = "img/icono_lugar.png";
+					imgLogo = "img/bienestar/logo_bienestar.png";
+					imgBackground = "img/bienestar/background_bienestar_2_.png";
+					imgCalendario = "img/bienestar/icono_calendario.png";
+					imgReloj = "img/bienestar/icono_reloj.png";
+					imgLugar = "img/bienestar/icono_lugar.png";
 				} else {
-					imgLogo = "img/logo_capacitacion.png";
-					imgBackground = "img/background_1.png";
-					imgCalendario = "img/calendario_icono.png";
-					imgReloj = "img/reloj_icono.png";
-					imgLugar = "img/lugar_icono.png";
+					imgLogo = "img/capacitacion/logo_capacitacion.png";
+					imgBackground = "img/capacitacion/background_1.png";
+					imgCalendario = "img/capacitacion/calendario_icono.png";
+					imgReloj = "img/capacitacion/reloj_icono.png";
+					imgLugar = "img/capacitacion/lugar_icono.png";
 				}
 				byteLogo=recuperarBytesDesdeArchivo(imgLogo);
 				background=recuperarBytesDesdeArchivo(imgBackground);
@@ -580,6 +581,12 @@ public class EventoService {
 				bCorreoImagen.setNombreVariable("img5");
 				bCorreoImagen.setArchivoAdjunto(ic_lugar);
 				lstImagenes[4]=bCorreoImagen;
+				
+				// Codigo QR:
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("QRCode");
+				bCorreoImagen.setArchivoAdjunto(persona.getCodQR());
+				lstImagenes[5]=bCorreoImagen;
 				
 				paramCorreoBean.setImagenesAdjuntas(lstImagenes);
 				String cuerpoCorreo = "";
@@ -688,7 +695,7 @@ public class EventoService {
 			
 				List<BImagenCorreoBean> lstBCorreoImagen = new ArrayList<BImagenCorreoBean>();
 				
-				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[5];
+				BImagenCorreoBean[] lstImagenes = new BImagenCorreoBean[6];
 				String imgLogo ="";
 				String imgBackground = "";
 				String imgCalendario = "";
@@ -696,18 +703,19 @@ public class EventoService {
 				String imgLugar = "";
 				
 				if(evt.getTipoEvento().equalsIgnoreCase("0202")) { // Bienestar
-					imgLogo = "img/logo_bienestar.png";
-					imgBackground = "img/background_bienestar_2_.png";
-					imgCalendario = "img/icono_calendario.png";
-					imgReloj = "img/icono_reloj.png";
-					imgLugar = "img/icono_lugar.png";
+					imgLogo = "img/bienestar/logo_bienestar.png";
+					imgBackground = "img/bienestar/background_bienestar_2_.png";
+					imgCalendario = "img/bienestar/icono_calendario.png";
+					imgReloj = "img/bienestar/icono_reloj.png";
+					imgLugar = "img/bienestar/icono_lugar.png";
 				} else {
-					imgLogo = "img/logo_capacitacion.png";
-					imgBackground = "img/background_1.png";
-					imgCalendario = "img/calendario_icono.png";
-					imgReloj = "img/reloj_icono.png";
-					imgLugar = "img/lugar_icono.png";
+					imgLogo = "img/capacitacion/logo_capacitacion.png";
+					imgBackground = "img/capacitacion/background_1.png";
+					imgCalendario = "img/capacitacion/calendario_icono.png";
+					imgReloj = "img/capacitacion/reloj_icono.png";
+					imgLugar = "img/capacitacion/lugar_icono.png";
 				}
+
 				byteLogo=recuperarBytesDesdeArchivo(imgLogo);
 				background=recuperarBytesDesdeArchivo(imgBackground);
 				ic_calendario = recuperarBytesDesdeArchivo(imgCalendario);
@@ -740,6 +748,12 @@ public class EventoService {
 				bCorreoImagen.setNombreVariable("img5");
 				bCorreoImagen.setArchivoAdjunto(ic_lugar);
 				lstImagenes[4]=bCorreoImagen;
+				
+				// Codigo QR:
+				bCorreoImagen = new BImagenCorreoBean();
+				bCorreoImagen.setNombreVariable("QRCode");
+				bCorreoImagen.setArchivoAdjunto(persona.getCodQR());
+				lstImagenes[5]=bCorreoImagen;
 				
 				paramCorreoBean.setImagenesAdjuntas(lstImagenes);
 				String cuerpoCorreo = "";
@@ -1051,7 +1065,7 @@ public class EventoService {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), filter.getSede() )));
 				}
 				if(filter.getFecha() != null) {
-					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("fechaIngreso"), filter.getFecha() )));
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("fechaAsistencia"), filter.getFecha() )));
 				}
 				if(filter.getDni() != null) {
 					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("dni"), filter.getDni() )));
