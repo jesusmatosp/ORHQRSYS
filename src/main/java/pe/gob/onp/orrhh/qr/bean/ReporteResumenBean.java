@@ -13,6 +13,7 @@ public class ReporteResumenBean implements Serializable {
 	private Long idPersona;
 	private Integer totalAsistido;
 	private Double porcentajeAsistido;
+	private Long idEvento;
 	
 	private List<DetailReporteResumenBean> detalle;
 	
@@ -51,6 +52,12 @@ public class ReporteResumenBean implements Serializable {
 	}
 	public void setPersona(PersonaDTO persona) {
 		this.persona = persona;
+	}
+	public Long getIdEvento() {
+		return idEvento;
+	}
+	public void setIdEvento(Long idEvento) {
+		this.idEvento = idEvento;
 	}
 	
 	

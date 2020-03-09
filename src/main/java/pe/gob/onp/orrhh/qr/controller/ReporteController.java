@@ -11,7 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +37,8 @@ import pe.gob.onp.orrhh.qr.bean.PersonaEventoAsistenteBean;
 import pe.gob.onp.orrhh.qr.bean.ReporteDetalladoBean;
 import pe.gob.onp.orrhh.qr.dto.FilterReporteDTO;
 import pe.gob.onp.orrhh.qr.dto.ResponseDataDTO;
+import pe.gob.onp.orrhh.qr.reportes.ExcelWriter;
+import pe.gob.onp.orrhh.qr.reportes.ReportePdfWriter;
 import pe.gob.onp.orrhh.qr.service.EventoService;
 
 @Controller
@@ -171,6 +177,42 @@ public class ReporteController {
 			response.setMessage(e.getLocalizedMessage());
 		}
 		return response;
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/persona/asistencia/detallada/export/excel")
+	public ResponseEntity<byte[]> getReportePersonaDetalladoExport(@RequestBody FilterReporteDTO filter) {
+		try {
+			ReporteDetalladoBean reporte = service.getListaAsistenciaDetallada(filter);
+			ExcelWriter excelWriter = new ExcelWriter();
+			byte[] documentContent = excelWriter.generarReporteDetalladoExcel(reporte);
+		    HttpHeaders headers = new HttpHeaders();
+		    headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+		    headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"reporte_detallado_asistencia.xls\"");
+		    headers.setContentLength(documentContent.length);	
+		    return new ResponseEntity<byte[]>(documentContent, headers, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			 return new ResponseEntity<byte[]>(null, null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@CrossOrigin(origins = {"http://localhost:9000", "http://localhost:4200", "http://104.41.14.101:8083"})
+	@PostMapping("/persona/asistencia/detallada/export")
+	public ResponseEntity<byte[]> getReportePersonaDetalladoPDF(@RequestBody FilterReporteDTO filter) {
+		try {
+			ReporteDetalladoBean reporte = service.getListaAsistenciaDetallada(filter);
+			ReportePdfWriter pdfReporte = new ReportePdfWriter(reporte);
+			byte[] documentContent = pdfReporte.generarReporteDetalladoPDF();
+		    HttpHeaders headers = new HttpHeaders();
+		    headers.setContentType(MediaType.parseMediaType("application/pdf"));
+		    headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"reporte_detallado_asistencia.pdf\"");
+		    headers.setContentLength(documentContent.length);	
+		    return new ResponseEntity<byte[]>(documentContent, headers, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			 return new ResponseEntity<byte[]>(null, null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	

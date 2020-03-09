@@ -51,7 +51,7 @@ public class PersonaEventoAsistenteBean implements Serializable{
 	private String sexo;
 
 	@Column( name = "EDAD" )
-	private Integer edad;
+	private String edad;
 	
 	@Column( name = "FECHA_INGRESO" )
 	private String fechaIngreso;
@@ -159,11 +159,11 @@ public class PersonaEventoAsistenteBean implements Serializable{
 		this.sexo = sexo;
 	}
 
-	public Integer getEdad() {
+	public String getEdad() {
 		return edad;
 	}
 
-	public void setEdad(Integer edad) {
+	public void setEdad(String edad) {
 		this.edad = edad;
 	}
 
