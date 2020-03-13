@@ -1,5 +1,7 @@
 package pe.gob.onp.orrhh.qr.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,6 +35,7 @@ public class EventoHorario {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn( name = "ID_EVENTO", nullable = false)
 	private Evento evento;
+	
 	
 	
 	public Long getIdEventoHorario() {
