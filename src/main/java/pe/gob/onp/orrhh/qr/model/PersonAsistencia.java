@@ -1,5 +1,6 @@
 package pe.gob.onp.orrhh.qr.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -51,6 +52,18 @@ public class PersonAsistencia {
 		this.idAsistencia = idAsistencia;
 	}
 	public Date getFechaAsistencia() {
+		if(fechaAsistencia != null) {
+			try {
+				SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+				String dateString = format.format(fechaAsistencia);
+				Date date = format.parse(dateString);
+				
+				return date;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
 		return fechaAsistencia;
 	}
 	public void setFechaAsistencia(Date fechaAsistencia) {
