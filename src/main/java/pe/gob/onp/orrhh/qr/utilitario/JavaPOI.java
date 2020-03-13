@@ -53,7 +53,7 @@ public class JavaPOI {
 					df = new DataFormatter();
 					String CellValue = df.formatCellValue(hssfRow.getCell(8));
 					//personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "MM/dd/YY"));
-					personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "dd/MM/YYYY"));
+					personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "dd/MM/yyyy"));
 					
 					personaDTO.setAreaCorporativa(obtenerCelda(hssfRow, 9));
 					personaDTO.setCorreoCorporativo(obtenerCelda(hssfRow, 10));
