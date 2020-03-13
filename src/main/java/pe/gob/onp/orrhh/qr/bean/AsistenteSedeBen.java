@@ -1,11 +1,13 @@
 package pe.gob.onp.orrhh.qr.bean;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table( name = "V_ASISTENTES_SEDE" )
@@ -40,6 +42,9 @@ public class AsistenteSedeBen implements Serializable {
 	
 	@Column( name = "TIPO_EVENTO" )
 	private String tipoEvento;
+	
+	@Column(name = "DT_FECHA_INICIO")
+	private Date dtFechaInicio; 
 	
 	
 	public Long getIdEvento() {
@@ -95,6 +100,12 @@ public class AsistenteSedeBen implements Serializable {
 	}
 	public void setTipoEvento(String tipoEvento) {
 		this.tipoEvento = tipoEvento;
+	}
+	public Date getDtFechaInicio() {
+		return dtFechaInicio;
+	}
+	public void setDtFechaInicio(Date dtFechaInicio) {
+		this.dtFechaInicio = dtFechaInicio;
 	}
 	
 	

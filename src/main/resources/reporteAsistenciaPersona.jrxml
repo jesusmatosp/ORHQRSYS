@@ -20,7 +20,7 @@
 	<field name="apellidoPaterno" class="java.lang.String"/>
 	<field name="apellidoMaterno" class="java.lang.String"/>
 	<field name="sexo" class="java.lang.String"/>
-	<field name="edad" class="java.lang.Long"/>
+	<field name="edad" class="java.lang.String"/>
 	<field name="fechaIngreso" class="java.lang.String"/>
 	<field name="puesto" class="java.lang.String"/>
 	<field name="regimen" class="java.lang.String"/>
@@ -349,7 +349,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{sexo}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField>
 				<reportElement x="452" y="0" width="42" height="20" uuid="ca46076e-4f4a-4b41-8131-a11f7cef6fcc"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7"/>

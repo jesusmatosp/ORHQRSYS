@@ -54,6 +54,7 @@ public class JavaPOI {
 					String CellValue = df.formatCellValue(hssfRow.getCell(8));
 					//personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "MM/dd/YY"));
 					personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "dd/MM/YYYY"));
+					
 					personaDTO.setAreaCorporativa(obtenerCelda(hssfRow, 9));
 					personaDTO.setCorreoCorporativo(obtenerCelda(hssfRow, 10));
 					personaDTO.setCorreoPersonal(obtenerCelda(hssfRow, 11));

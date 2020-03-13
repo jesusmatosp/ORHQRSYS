@@ -6,13 +6,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -548,8 +545,6 @@ public class EventoService {
 					imgCalendario = "img/bienestar/icono_calendario.png";
 					imgReloj = "img/bienestar/icono_reloj.png";
 					imgLugar = "img/bienestar/icono_lugar.png";
-					//JRS
-					cabeceraCorreoBean.setCorreoRemitente(prop.getProperty("correoRemitente2"));
 				} else {
 					imgLogo = "img/capacitacion/logo_capacitacion.png";
 					imgBackground = "img/capacitacion/background_1.png";
@@ -720,15 +715,12 @@ public class EventoService {
 					imgCalendario = "img/bienestar/icono_calendario.png";
 					imgReloj = "img/bienestar/icono_reloj.png";
 					imgLugar = "img/bienestar/icono_lugar.png";
-					//JRS
-					cabeceraCorreoBean.setCorreoRemitente(prop.getProperty("correoRemitente2"));
-
 				} else {
 					imgLogo = "img/capacitacion/logo_capacitacion.png";
 					imgBackground = "img/capacitacion/background_1.png";
 					imgCalendario = "img/capacitacion/calendario_icono.png";
 					imgReloj = "img/capacitacion/reloj_icono.png";
-					imgLugar = "img/capacitacion/lugar_icono.png";					
+					imgLugar = "img/capacitacion/lugar_icono.png";
 				}
 				
 				//JRS
@@ -814,111 +806,106 @@ public class EventoService {
 		htmlText.append("<table border=0 alingn='left'>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 align='center' style='color:#3694CE'><h1><font face='Arial'>"+nombreActividad);
+        htmlText.append("<td colspan=2 align='center' style='color:#3694CE'> <h1>"+nombreActividad);
         htmlText.append("</h1></td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h2>.</h2>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#293C9B'><b><h4><font face='Arial'> Integrante: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td style='color:#00B82F'><h2><font face='Arial'>"+nombreColaborador);
+        htmlText.append("<td style='color:#293C9B'><b><h4> Integrante: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td style='color:#00B82F'><h2>"+nombreColaborador);
         htmlText.append("</h2></td>");
         htmlText.append("</tr>");
         
        
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#293C9B'><b><h4><font face='Arial'> Inicio: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+fechaInicio);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#293C9B'><b><h4> Inicio: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+fechaInicio);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#293C9B'><b><h4><font face='Arial'> Fin: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+fechaFin);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#293C9B'><b><h4> Fin: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+fechaFin);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#293C9B'><b><h4><font face='Arial'> Lugar: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+sede);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#293C9B'><b><h4> Lugar: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+sede);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#293C9B'><b><h4><font face='Arial'> Horarios: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+horarios);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#293C9B'><b><h4> Horarios: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+horarios);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h1>ESPACIO</h1>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3<b><h4><font face='Arial'> Recuerda presentar tu <font color=#3694CE>código QR adjunto</font> para el registro de tu asistencia. ");
+        htmlText.append("<td colspan=2><b><h4> Recuerda presentar tu <font color=#3694CE>código QR adjunto</font> para el registro de tu asistencia. ");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
                 
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 align='center'><b><h4><em><font face='Arial'> Este código es personal e intransferible </em>");
+        htmlText.append("<td colspan=2 align='center'><b><h4><em> Este código es personal e intransferible </em>");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h2>ESPACIO</h2>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 style='color:#00B82F' align='center'><b><h4><em><font face='Arial'> ¡Te esperamos para iniciar la actividad!</em> ");
+        htmlText.append("<td colspan=2 style='color:#00B82F' align='center'><b><h4><em> ¡Te esperamos para iniciar la actividad!</em> ");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
@@ -934,111 +921,106 @@ public class EventoService {
         htmlText.append("<table border=0 alingn='left'>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 align='center' style='color:#7030A0'><h1><font face='Arial'>"+nombreActividad);
+        htmlText.append("<td colspan=2 align='center' style='color:#7030A0'> <h1>"+nombreActividad);
         htmlText.append("</h1></td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h2>.</h2>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#0070C0'><b><h4><font face='Arial'> Integrante: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td style='color:#CB07A1'><h2><font face='Arial'>"+nombreColaborador);
+        htmlText.append("<td style='color:#0070C0'><b><h4> Integrante: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td style='color:#CB07A1'><h2>"+nombreColaborador);
         htmlText.append("</h2></td>");
         htmlText.append("</tr>");
         
        
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#0070C0'><b><h4><font face='Arial'> Inicio: ");
-        htmlText.append("</b></h4></td>");        
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+fechaInicio);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#0070C0'><b><h4> Inicio: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+fechaInicio);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#0070C0'><b><h4><font face='Arial'> Fin: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+fechaFin);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#0070C0'><b><h4> Fin: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+fechaFin);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#0070C0'><b><h4><font face='Arial'> Lugar: ");
-        htmlText.append("</b></h4></td>");        
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+sede);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#0070C0'><b><h4> Lugar: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+sede);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h3>ESPACIO</h3>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td style='color:#0070C0'><b><h4><font face='Arial'> Horarios: ");
-        htmlText.append("</b></h4></td>");
-        htmlText.append("<td style='color:white'><h3>.</h3></td>");
-        htmlText.append("<td><font face='Arial'>"+horarios);
-        htmlText.append("</td>");
+        htmlText.append("<td style='color:#0070C0'><b><h4> Horarios: ");
+        htmlText.append("</b></h2></td>");        
+        htmlText.append("<td>"+horarios);
+        htmlText.append("</font></h4></td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h1>ESPACIO</h1>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3><b><h4><font face='Arial'> Recuerda presentar tu <font color=#7030A0>código QR adjunto</font> para el registro de tu asistencia. ");
+        htmlText.append("<td colspan=2><b><h4> Recuerda presentar tu <font color=#7030A0>código QR adjunto</font> para el registro de tu asistencia. ");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
                 
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 align='center'><b><h4><em><font face='Arial'> Este código es personal e intransferible </em>");
+        htmlText.append("<td colspan=2 align='center'><b><h4><em> Este código es personal e intransferible </em>");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
         htmlText.append("<tr style='color:white'>");
-        htmlText.append("<td colspan=3>");
+        htmlText.append("<td colspan=2>");
         htmlText.append("<h2>ESPACIO</h2>");
         htmlText.append("</td>");
         htmlText.append("</tr>");
         
         
         htmlText.append("<tr>");
-        htmlText.append("<td colspan=3 style='color:#CB07A1' align='center'><b><h4><em><font face='Arial'> ¡Te esperamos para iniciar la actividad!</em> ");
+        htmlText.append("<td colspan=2 style='color:#CB07A1' align='center'><b><h4><em> ¡Te esperamos para iniciar la actividad!</em> ");
         htmlText.append("</b></h4></td>");
         htmlText.append("</tr>");
         
@@ -1147,19 +1129,15 @@ public class EventoService {
 				Persona persona = oPersona.get();
 				oReporteResumen.setNombrePersona(persona.getNombres() + " " + persona.getApellidoPaterno() + " " + persona.getApellidoMaterno());
 				PersonaDTO personaDTO = new PersonaDTO();
-				//JRS
-				//personaDTO.setEdad(personaDTO.getEdad().substring(0, 2));
 				try {
 					BeanUtils.copyProperties(personaDTO, persona);
 					oReporteResumen.setPersona(personaDTO);
-					//JRS
-					oReporteResumen.getPersona().setEdad(oReporteResumen.getPersona().getEdad().substring(0, 2));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} 
 			}
 			
-			oReporteResumen.setIdPersona(k);			
+			oReporteResumen.setIdPersona(k);
 			List<DetailReporteResumenBean> lstDetail = new ArrayList<DetailReporteResumenBean>();
 			for(String columna: lstColumnas) {
 				DetailReporteResumenBean oDetalle = new DetailReporteResumenBean();
@@ -1202,32 +1180,32 @@ public class EventoService {
 	}
 	
 	// Vistas Soporte:
-		public List<AsistenteSedeBen> getListaAsistentexSede(FilterReporteDTO filter) throws EventoException {
-			return asistenciaSedeRepository.findAll(new Specification<AsistenteSedeBen>() {
-				@Override
-				public Predicate toPredicate(Root<AsistenteSedeBen> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-					List<Predicate> predicates = new ArrayList<Predicate>();
-					if(filter.getTipoEvento() != null) {
-						predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("tipoEvento"), filter.getTipoEvento() )));
-					}
-					if(filter.getSede() != null) {
-						predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), filter.getSede() )));
-					}
-					if(filter.getFechaInicio() != null && filter.getFechaFin() != null){
-						try {
-							Date dtBegin = DateUtilitario.convertStringToDate(filter.getFechaInicio());
-							Date dtEnd = DateUtilitario.convertStringToDate(filter.getFechaFin());
-							Path<Date> dateEntryPath = root.get("dtFechaInicio");
-							predicates.add(criteriaBuilder.and(criteriaBuilder.between(dateEntryPath, dtBegin, dtEnd)));
-						} catch (Exception e) {
-							LOG.error(e.getLocalizedMessage());
-						}
-					}
-					query.orderBy(criteriaBuilder.desc(root.get("idEvento")));
-					return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+	public List<AsistenteSedeBen> getListaAsistentexSede(FilterReporteDTO filter) throws EventoException {
+		return asistenciaSedeRepository.findAll(new Specification<AsistenteSedeBen>() {
+			@Override
+			public Predicate toPredicate(Root<AsistenteSedeBen> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if(filter.getTipoEvento() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("tipoEvento"), filter.getTipoEvento() )));
 				}
-			});
-		}
+				if(filter.getSede() != null) {
+					predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("sede"), filter.getSede() )));
+				}
+				if(filter.getFechaInicio() != null && filter.getFechaFin() != null){
+					try {
+						Date dtBegin = DateUtilitario.convertStringToDate(filter.getFechaInicio());
+						Date dtEnd = DateUtilitario.convertStringToDate(filter.getFechaFin());
+						Path<Date> dateEntryPath = root.get("dtFechaInicio");
+						predicates.add(criteriaBuilder.and(criteriaBuilder.between(dateEntryPath, dtBegin, dtEnd)));
+					} catch (Exception e) {
+						LOG.error(e.getLocalizedMessage());
+					}
+				}
+				query.orderBy(criteriaBuilder.desc(root.get("idEvento")));
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		});
+	}
 	
 	public List<PersonaEventoAsistenteBean> getListaPersonaEventoAsistencia(FilterReporteDTO filter) throws EventoException {
 		return personaEventoAsistenciaRepository.findAll(new Specification<PersonaEventoAsistenteBean>() {

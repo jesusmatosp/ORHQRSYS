@@ -108,7 +108,7 @@ public class ExcelWriter {
             		.setCellValue(personaDTO.getSexo());
             
             row.createCell(7)
-    				.setCellValue(personaDTO.getEdad());
+    				.setCellValue(personaDTO.getEdad().substring(0,2));
             
             row.createCell(8)
     				.setCellValue(personaDTO.getPuesto());

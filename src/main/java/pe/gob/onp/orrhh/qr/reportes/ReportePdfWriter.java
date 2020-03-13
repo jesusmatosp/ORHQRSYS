@@ -143,7 +143,7 @@ public class ReportePdfWriter {
         	table.addCell(personaDTO.getApellidoMaterno());
         	table.addCell(personaDTO.getNombres());
         	table.addCell(personaDTO.getSexo());
-        	table.addCell(personaDTO.getEdad());
+        	table.addCell(personaDTO.getEdad().substring(0,2));
         	table.addCell(personaDTO.getPuesto());
         	table.addCell(personaDTO.getRegimen());
         	table.addCell(personaDTO.getAreaCorporativa());
