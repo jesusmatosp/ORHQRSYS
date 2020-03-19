@@ -17,6 +17,7 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.Section;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -48,7 +49,14 @@ public class ReportePdfWriter {
 	public byte[] generarReporteDetalladoPDF() {
 		byte[] pdfBytes = null;
 		Document document = new Document();
-		document.setPageSize(PageSize.A4.rotate());
+		// document.setPageSize(PageSize.A4.rotate());
+		
+		Rectangle one = new Rectangle(1500, 800);
+		// Rectangle two = new Rectangle(700,400);
+		
+		document.setPageSize(one);
+		document.setMargins(10, 10, 10, 10);
+		
 		try {
 			String path = new File(".").getCanonicalPath();
         	// String FILE_NAME = path + "/itext-test-file.pdf";
@@ -123,17 +131,19 @@ public class ReportePdfWriter {
 		c.add("Reg x Persona");
 		
         PdfPTable table = new PdfPTable(c.size());
-        table.setWidthPercentage(90f);
+        table.setWidthPercentage(100f);
         // Create cells
+       
         for(int i = 0; i < c.size(); i++) {
         	PdfPCell c1 = new PdfPCell(new Phrase(c.get(i).toString()));
             c1.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(c1);
         }
         table.setHeaderRows(1);
-
+        
         int rowNum = 1;
         List<ReporteResumenBean> lstResumen = reporte.getData();
+        
         for(ReporteResumenBean resumen: lstResumen) {   
         	PersonaDTO personaDTO = resumen.getPersona();
         	table.addCell("" + rowNum);

@@ -1126,6 +1126,18 @@ public class EventoService {
 		ReporteDetalladoBean reporteDetallado = new ReporteDetalladoBean();
 		List<ReporteResumenBean> lstReporteResponse = new ArrayList<ReporteResumenBean>();
 		List<PersonAsistencia> _list2 = asistenciaRepository.getAsistenciaByIdEvento(filter.getIdCurso());
+		
+		// Get Evento:
+		Parametro param = parametroRepository.findParametroByCodParametro(filter.getTipoEvento());
+		reporteDetallado.setTipoEvento(param.getNombreParametro());
+		
+		// Evento:
+		Optional<Evento> oEvento = repository.findById(filter.getIdCurso());
+		Evento evto = new Evento();
+		if(oEvento != null)
+			evto = oEvento.get();
+		reporteDetallado.setNombreEvento(evto.getNombreEvento());
+		
 		List<String> lstColumnas = new ArrayList<String>();
 		Map<Date, List<PersonAsistencia>> columnas = _list2.stream().collect(Collectors.groupingBy(PersonAsistencia::getFechaAsistencia));
 		columnas.forEach((k, v) -> {

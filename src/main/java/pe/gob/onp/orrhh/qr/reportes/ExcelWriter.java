@@ -8,14 +8,17 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import pe.gob.onp.orrhh.qr.bean.DetailReporteResumenBean;
@@ -55,28 +58,63 @@ public class ExcelWriter {
 
         // Header:
         Font headerTitleFont = workbook.createFont();
-        headerTitleFont.setFontHeightInPoints((short) 10);
+        headerTitleFont.setBold(true);
+        headerTitleFont.setFontHeightInPoints((short) 16);
+
         CellStyle headerTitleCellStyle = workbook.createCellStyle();
         headerTitleCellStyle.setFont(headerTitleFont);
+        headerTitleCellStyle.setAlignment(HorizontalAlignment.CENTER);
         Row headerTitle = sheet.createRow(1);
         Cell cellTitle1 = headerTitle.createCell(1);
         cellTitle1.setCellValue("Departamento de Recursos Humanos");
         
-        cellTitle1 = headerTitle.createCell(10);
+        sheet.addMergedRegion(new CellRangeAddress(1,1, 1, 3));
+        
+        cellTitle1 = headerTitle.createCell(5);
         cellTitle1.setCellValue("REPORTE DETALLADO DE ASISTENCIA");
+        cellTitle1.setCellStyle(headerTitleCellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(1,1, 5, 8 ));
         
-        
+        cellTitle1 = headerTitle.createCell(11);
+        cellTitle1.setCellValue("Oficina de Normalización Previsional");
+        sheet.addMergedRegion(new CellRangeAddress(1,1,11, 13 ));
         
         // Create a Font for styling header cells
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
-        headerFont.setFontHeightInPoints((short) 14);
-        headerFont.setColor(IndexedColors.ORANGE.getIndex());
-
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setColor(IndexedColors.DARK_BLUE.getIndex());
+        
         // Create a CellStyle with the font
         CellStyle headerCellStyle = workbook.createCellStyle();
         headerCellStyle.setFont(headerFont);
-
+        headerCellStyle.setBorderBottom(BorderStyle.MEDIUM);
+        headerCellStyle.setBorderTop(BorderStyle.MEDIUM);
+        headerCellStyle.setBorderRight(BorderStyle.MEDIUM);
+        headerCellStyle.setBorderLeft(BorderStyle.MEDIUM);
+        
+        // Filters:
+        Font fontHeaderFilter = workbook.createFont();
+        fontHeaderFilter.setBold(true);
+        CellStyle fontCellStyle = workbook.createCellStyle();
+        fontCellStyle.setFont(fontHeaderFilter);
+        
+        Row headerFilter = sheet.createRow(3);
+        Cell cellFilter = headerFilter.createCell(3);
+        cellFilter.setCellValue("Tipo de Evento: ");
+        cellFilter.setCellStyle(fontCellStyle);
+        
+        cellFilter = headerFilter.createCell(4);
+        cellFilter.setCellValue(reporte.getTipoEvento());
+        
+        cellFilter = headerFilter.createCell(6);
+        cellFilter.setCellValue("Nombre de Evento: ");
+        cellFilter.setCellStyle(fontCellStyle);
+        
+        cellFilter = headerFilter.createCell(7);
+        cellFilter.setCellValue(reporte.getNombreEvento());
+        
+        
         // Create a Row
         Row headerRow = sheet.createRow(6);
 
@@ -85,6 +123,8 @@ public class ExcelWriter {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(c.get(i).toString());
             cell.setCellStyle(headerCellStyle);
+            
+            
         }
 
         // Create Cell Style for formatting Date
@@ -92,7 +132,7 @@ public class ExcelWriter {
         dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
 
         // Create Other rows and cells with employees data
-        int rowNum = 1;
+        int rowNum = 7;
         
         List<ReporteResumenBean> lstResumen = reporte.getData();
         
