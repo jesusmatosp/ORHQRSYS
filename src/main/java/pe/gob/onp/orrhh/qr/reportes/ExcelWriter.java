@@ -53,6 +53,20 @@ public class ExcelWriter {
         // Create a Sheet
         Sheet sheet = workbook.createSheet("Asistencia Detallada");
 
+        // Header:
+        Font headerTitleFont = workbook.createFont();
+        headerTitleFont.setFontHeightInPoints((short) 10);
+        CellStyle headerTitleCellStyle = workbook.createCellStyle();
+        headerTitleCellStyle.setFont(headerTitleFont);
+        Row headerTitle = sheet.createRow(1);
+        Cell cellTitle1 = headerTitle.createCell(1);
+        cellTitle1.setCellValue("Departamento de Recursos Humanos");
+        
+        cellTitle1 = headerTitle.createCell(10);
+        cellTitle1.setCellValue("REPORTE DETALLADO DE ASISTENCIA");
+        
+        
+        
         // Create a Font for styling header cells
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
@@ -64,7 +78,7 @@ public class ExcelWriter {
         headerCellStyle.setFont(headerFont);
 
         // Create a Row
-        Row headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(6);
 
         // Create cells
         for(int i = 0; i < c.size(); i++) {
