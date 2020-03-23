@@ -11,18 +11,14 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import pe.gob.onp.orrhh.qr.bean.DetailReporteResumenBean;
@@ -83,30 +79,6 @@ public class ExcelWriter {
         cellTitle1.setCellValue("Oficina de Normalización Previsional");
         sheet.addMergedRegion(new CellRangeAddress(1,1,11, 13 ));
         
-        // Imagen
-        // FileInputStream obtains input bytes from the image file
-        // InputStream inputStream = new FileInputStream("/resources/logo_onp.png");
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("logo_onp.png"); 
-        
-        //Get the contents of an InputStream as a byte[].
-        byte[] bytes = IOUtils.toByteArray(inputStream);
-        //Adds a picture to the workbook
-        int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
-        //close the input stream
-        inputStream.close();
-        
-        // Creates the top-level drawing patriarch.
-        Drawing drawing = sheet.createDrawingPatriarch();
-        CreationHelper helper = workbook.getCreationHelper();
-        // Create an anchor that is attached to the worksheet
-        ClientAnchor anchor = helper.createClientAnchor();
-        anchor.setCol1(14);
-        anchor.setCol2(15);
-        anchor.setRow1(2);
-        anchor.setRow2(3);
-        // Fin Imagen
-        
-        
         // Create a Font for styling header cells
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
@@ -161,7 +133,7 @@ public class ExcelWriter {
 
         // Create Other rows and cells with employees data
         int rowNum = 7;
-        int fila=1;
+        
         List<ReporteResumenBean> lstResumen = reporte.getData();
         
         for(ReporteResumenBean resumen: lstResumen) {     	
@@ -169,7 +141,7 @@ public class ExcelWriter {
         	PersonaDTO personaDTO = resumen.getPersona();
             
             row.createCell(0)
-                    .setCellValue(fila);
+                    .setCellValue(rowNum);
 
             row.createCell(1)
                     .setCellValue(resumen.getIdEvento());
@@ -200,7 +172,7 @@ public class ExcelWriter {
             
             row.createCell(10)
     				.setCellValue(personaDTO.getAreaCorporativa());
-            fila=fila+1;
+            
             int columnNum = 11;
             List<DetailReporteResumenBean> lstDetalle = resumen.getDetalle();
             for(DetailReporteResumenBean detalle: lstDetalle) {
@@ -214,8 +186,6 @@ public class ExcelWriter {
         
         rowNum = 1;
         
-        final Picture pict = drawing.createPicture( anchor, pictureIdx );
-        pict.resize();
         
 
 		// Resize all columns to fit the content size

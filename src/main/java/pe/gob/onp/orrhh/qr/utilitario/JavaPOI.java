@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -51,6 +52,11 @@ public class JavaPOI {
 					personaDTO.setPuesto(obtenerCelda(hssfRow, 6));
 					personaDTO.setRegimen(obtenerCelda(hssfRow, 7));
 					df = new DataFormatter();
+					
+					if (HSSFDateUtil.isCellDateFormatted(hssfRow.getCell(8))) {
+						throw new PersonaException("El campo fecha debe estar en formato TEXTO");
+					}
+					
 					String CellValue = df.formatCellValue(hssfRow.getCell(8));
 					//personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "MM/dd/YY"));
 					personaDTO.setFechaIngreso(DateUtilitario.convertStringToDate(CellValue, "dd/MM/yyyy"));
